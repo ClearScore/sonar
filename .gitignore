@@ -1,0 +1,11 @@
+.idea
+node_modules
+dist
+/build/reports/junit/junit.xml
+/lerna-debug.log
+/.reports
+.eslintcache
+yarn-error.log
+junit.xml
+/resources
+radar.csv
