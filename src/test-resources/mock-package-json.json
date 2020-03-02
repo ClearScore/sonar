@@ -1,0 +1,31 @@
+{
+  "name": "@clearscore/test-package-name",
+  "dependencies": {
+    "@clearscore/internal-test-patch-x": "0.0.x",
+    "@clearscore/internal-test-patch-x2": "1.0.x",
+    "@clearscore/internal-test-minor-x": "0.x",
+    "@clearscore/internal-test-minor-x2": "1.x",
+    "@clearscore/internal-test": "0.0.0",
+    "@clearscore/internal-test2": "1.0.0",
+    "@clearscore/internal-test-tilde": "~1.0.0",
+    "@clearscore/internal-test-hat": "^1.0.0",
+    "external-test": "1.0.x"
+  },
+  "devDependencies": {
+    "@clearscore/internal-test-patch-x": "0.0.x",
+    "@clearscore/internal-test-patch-x2": "1.0.x",
+    "@clearscore/internal-test-minor-x": "0.x",
+    "@clearscore/internal-test-minor-x2": "1.x",
+    "@clearscore/internal-test": "0.0.0",
+    "@clearscore/internal-test2": "1.0.0",
+    "@clearscore/internal-test-tilde": "~1.0.0",
+    "@clearscore/internal-test-hat": "^1.0.0",
+    "external-test": "0.0.x"
+  },
+  "peerDependencies": {
+    "@clearscore/internal-test-patch-x": "0.0.x",
+    "@clearscore/internal-test-minor-x": "0.x",
+    "@clearscore/internal-test": "0.0.0",
+    "external-test": "0.0.0"
+  }
+}
