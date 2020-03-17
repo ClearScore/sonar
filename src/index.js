@@ -18,8 +18,10 @@ const { log, error } = require('./lib/log');
 
 const configPathJson = findUp.sync(['.sonarrc', '.sonar.json']);
 const configPathJs = configPathJson || findUp.sync(['.sonarrc.js', 'sonar.config.js']);
+/* eslint-disable no-nested-ternary */
 // eslint-disable-next-line import/no-dynamic-require
 const config = configPathJson ? JSON.parse(fs.readFileSync(configPathJson)) : configPathJs ? require(configPathJs) : {};
+/* eslint-enable no-nested-ternary */
 
 const { argv } = yargs
     .config(config)
@@ -33,7 +35,6 @@ const { argv } = yargs
         'dependencies',
         'devDependencies',
         'peerDependencies',
-        'pattern',
         'fail',
         'dryRun',
     ])
@@ -50,7 +51,7 @@ const { argv } = yargs
     .command('peerDependencies', 'Update peerDependencies')
     .command('fail', 'Terminate the process with an error if there are out of date packages')
     .command('dry-run', 'Run the process, without actually updating any files')
-    .command('pattern', 'Only check packages matching the given pattern')
+    .command('pattern <pattern>', 'Only check packages matching the given pattern')
     .command('folder', 'Where to look for package.json files')
     .command('concurrency', 'Change how many promises to run concurrently')
     .example('$0 --major --no-internal babel', 'Update all external dependencies with a name containing babel')
@@ -104,9 +105,7 @@ FileHound.create()
         const types = [argv.deps && 'dependencies', argv.dev && 'devDependencies', argv.peer && 'peerDependencies']
             .filter(Boolean)
             .join(', ');
-        const owners = [argv.internal && 'internal', argv.external && 'external']
-            .filter(Boolean)
-            .join(', ');
+        const owners = [argv.internal && 'internal', argv.external && 'external'].filter(Boolean).join(', ');
         log(`|`);
         log(`|   ${chalk.bold('is Dry-run?:')} ${argv.dryRun}`);
         log(`|   ${chalk.bold('SemVer:')} ${semVer}`);

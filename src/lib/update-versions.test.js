@@ -309,4 +309,46 @@ describe('map-versions', () => {
             });
         });
     });
+    describe('pattern', () => {
+        beforeEach(() => {
+            testOptions = setTestOptions({
+                pattern: '@clearscore/internal-test',
+                patch: true,
+                internal: true,
+                minor: true,
+                major: true,
+                deps: true,
+            });
+        });
+        it('sould use pattern if it is provided', async () => {
+            testJson = setTestJson();
+            const updated = await updateVersions(testJson, (_) => _, testOptions, mockBar);
+
+            expect(updated.dependencies['@clearscore/internal-test']).toEqual('1.1.1');
+            expect(updated.dependencies['@clearscore/internal-test2']).toEqual('1.1.1');
+        });
+
+        it('should handle multiple patterns', async () => {
+            const pattern = '@clearscore/(internal-test|foo|bar)';
+            testOptions = setTestOptions({
+                ...testOptions,
+                pattern,
+            });
+
+            testJson = setTestJson({
+                dependencies: {
+                    '@clearscore/foo': '0.0.0',
+                    '@clearscore/bar': '1.0.0',
+                    '@clearscore/baz': '1.1.0',
+                },
+            });
+            const updated = await updateVersions(testJson, (_) => _, testOptions, mockBar);
+
+            expect(updated.dependencies['@clearscore/internal-test']).toEqual('1.1.1');
+            expect(updated.dependencies['@clearscore/internal-test2']).toEqual('1.1.1');
+            expect(updated.dependencies['@clearscore/foo']).toEqual('1.1.1');
+            expect(updated.dependencies['@clearscore/bar']).toEqual('1.1.1');
+            expect(updated.dependencies['@clearscore/baz']).toEqual('1.1.0');
+        });
+    });
 });
