@@ -17,7 +17,7 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 const updateVersions = async (content, saveError, options = {}, depsBar) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
     const { major, minor, patch, deps, dev, peer, concurrency, pattern } = options;
-    const matchRegEx = new RegExp(pattern || (options._ && options._[0]) || '', 'i');
+    const matchRegEx = new RegExp(pattern, 'i');
     const newContent = { ...content };
 
     // alias cli args to help code make more sense
