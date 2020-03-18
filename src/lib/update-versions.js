@@ -17,7 +17,8 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 const updateVersions = async (content, saveError, options = {}, depsBar) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
     const { major, minor, patch, deps, dev, peer, concurrency, pattern } = options;
-    const matchRegEx = new RegExp(pattern || (options._ && options._[0]) || '', 'i');
+    const matcher = pattern || (options._ && options._[0]) || '';
+    const matchRegEx = new RegExp(matcher, 'i');
     const newContent = { ...content };
 
     // alias cli args to help code make more sense
@@ -34,7 +35,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
     const peerDepsToUpdate = Object.keys(peerDependencies).filter((dep) => filter({ ...options, dep }));
 
     async function mapper(dependencyType, dependency) {
-        if (pattern && !matchRegEx.test(dependency)) return newContent;
+        if (matcher && !matchRegEx.test(dependency)) return newContent;
         const version = content[dependencyType][dependency];
         const latestVersion = await getLatest(dependency);
 
