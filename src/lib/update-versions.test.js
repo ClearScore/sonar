@@ -386,7 +386,7 @@ describe('map-versions', () => {
                     '@clearscore/baz': '1.1.0',
                 },
             });
-            const updated = await updateVersions(testJson, (_) => _, testOptions, mockBar);
+            const updated = await updateVersions(testJson, (arg1) => arg1, testOptions, mockBar);
 
             expect(updated.dependencies['@clearscore/internal-test']).toEqual('1.1.1');
             expect(updated.dependencies['@clearscore/internal-test2']).toEqual('1.1.1');
