@@ -9,4 +9,7 @@ module.exports = {
     collectCoverageFrom: ['src/**/*.js'],
     testPathIgnorePatterns: [],
     moduleNameMapper: {},
+    resetMocks: true,
+    resetModules: true,
+    restoreMocks: true,
 };

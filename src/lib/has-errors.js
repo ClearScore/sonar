@@ -37,7 +37,7 @@ function errorFactory({ major, minor, patch }) {
 
     function saveError({ semVerChange, packageName, dependency, version, newVersion }) {
         if (!newVersion) {
-            error(`${packageName} : ${dependency}}@${version} => unknown`);
+            error(`${packageName} : ${dependency} => unknown version`);
             return;
         }
 

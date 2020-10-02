@@ -65,6 +65,7 @@ Commands:
   sonar pattern           Only check packages matching the given pattern
   sonar folder            Where to look for package.json files
   sonar concurrency       Change how many promises to run concurrently
+  sonar canary            target only those packages that have the specified carnary release
 
 Options:
   --version                   Show version number                      [boolean]
@@ -76,6 +77,7 @@ Options:
   --patch                                              [boolean] [default: true]
   --folder                                                        [default: "."]
   --concurrency                                                    [default: 10]
+  --canary                                                         [default: ""]
   -x, --ignoreScopes                                       [array] [default: []]
   -s, --internalScopes                                     [array] [default: []]
   -i, --internal                                       [boolean] [default: true]
@@ -85,10 +87,9 @@ Options:
   --peer, --peerDependencies                           [boolean] [default: true]
 
 Examples:
-  sonar --major --no-internal babel  Update all external dependencies with
-                                           a name containing babel
-  sonar "babel|postcss|eslint|jest"  Update minor versions of babel,
-                                           postcss, eslint and jest dependencies
+  sonar --major --no-internal babel  Update all external dependencies with a name containing babel
+  sonar "babel|postcss|eslint|jest"  Update minor versions of babel, postcss, eslint and jest dependencies
+  sonar --canary feat-update         Update all dependencies with a release containing feat-update
 
 ```
 
