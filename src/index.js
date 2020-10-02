@@ -38,6 +38,7 @@ const { argv } = yargs
         'fail',
         'dryRun',
     ])
+    .string('canary')
     .array(['internal-scopes', 'ignore-scopes'])
     .command('ignore-scopes', 'These scopes will be ignored by the updater')
     .command('internal-scopes', 'Flag scopes as internal')
@@ -54,6 +55,7 @@ const { argv } = yargs
     .command('pattern <pattern>', 'Only check packages matching the given pattern')
     .command('folder', 'Where to look for package.json files')
     .command('concurrency', 'Change how many promises to run concurrently')
+    .command('canary', 'Only update thos packages with a canary release matching the given string')
     .example('$0 --major --no-internal babel', 'Update all external dependencies with a name containing babel')
     .example('$0 "babel|postcss|eslint|jest"', 'Update minor versions of babel, postcss, eslint and jest dependencies')
     .help('h')
@@ -83,6 +85,7 @@ const { argv } = yargs
         peerDependencies: true,
         folder: '.',
         concurrency: 10,
+        canary: '',
     });
 
 const { folder, dryRun, concurrency = 10, fail } = argv;

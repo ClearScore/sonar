@@ -1,8 +1,13 @@
-const getLatestVersion = require('latest-version');
+const packageJson = require('package-json');
 
-async function getLatestFromRepo(pck) {
+const getVersion = async (packageName, { canary } = {}) => {
+    const data = await packageJson(packageName.toLowerCase(), { allVersions: true });
+    return canary ? Object.keys(data.versions).find((version) => version.includes(canary)) : data['dist-tags'].latest;
+};
+
+async function getLatestFromRepo(pck, options) {
     try {
-        const version = await getLatestVersion(pck);
+        const version = await getVersion(pck, options);
         return version;
     } catch (e) {
         return undefined;
@@ -11,12 +16,11 @@ async function getLatestFromRepo(pck) {
 
 function getLatestFactory() {
     const checkedCache = {};
-
-    return function getLatest(dep) {
+    return async function getLatest(dep, options) {
         if (checkedCache[dep]) {
             return checkedCache[dep];
         }
-        const latestVersion = getLatestFromRepo(dep);
+        const latestVersion = await getLatestFromRepo(dep, options);
         checkedCache[dep] = latestVersion;
         return latestVersion;
     };

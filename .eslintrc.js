@@ -5,7 +5,7 @@ module.exports = {
         node: true,
     },
     plugins: ['prettier'],
-    extends: ['eslint:recommended', 'airbnb', 'prettier', 'plugin:postcss-modules/recommended'],
+    extends: ['eslint:recommended', 'airbnb', 'prettier'],
     globals: {},
     parserOptions: {
         sourceType: 'module',
@@ -106,8 +106,6 @@ module.exports = {
          */
         'prefer-promise-reject-errors': ['warn'],
         'guard-for-in': ['warn'],
-        'postcss-modules/no-unused-class': ['warn'],
-        'postcss-modules/no-undef-class': ['warn'],
     },
     overrides: [
         // Jest
@@ -122,8 +120,6 @@ module.exports = {
                 'prefer-destructuring': 0,
                 'global-require': 0,
                 'react/jsx-props-no-spreading': 0,
-                'postcss-modules/no-unused-class': 0,
-                'postcss-modules/no-undef-class': 0,
 
                 /*
               Below are auto fixed

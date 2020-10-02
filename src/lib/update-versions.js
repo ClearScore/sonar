@@ -3,7 +3,17 @@ const pMapSeries = require('p-map');
 
 const { getLatestFactory } = require('./get-latest');
 const { update } = require('./update-version');
-const { MAJOR, MINOR, PATCH, DEV_DEPENDENCIES, PEER_DEPENDENCIES, DEPENDENCIES } = require('./consts');
+const {
+    MAJOR,
+    MINOR,
+    PATCH,
+    PREMINOR,
+    PREPATCH,
+    PREMAJOR,
+    DEV_DEPENDENCIES,
+    PEER_DEPENDENCIES,
+    DEPENDENCIES,
+} = require('./consts');
 
 const getLatest = getLatestFactory();
 
@@ -16,7 +26,7 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 
 const updateVersions = async (content, saveError, options = {}, depsBar) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
-    const { major, minor, patch, deps, dev, peer, concurrency, pattern } = options;
+    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary } = options;
     const matcher = pattern || (options._ && options._[0]) || '';
     const matchRegEx = new RegExp(matcher, 'i');
     const newContent = { ...content };
@@ -28,6 +38,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
     const updateMajors = major;
     const updateMinors = minor;
     const updatePatches = patch;
+    const updateCanary = canary;
 
     // filter out deps we dont want to update
     const depsToUpdate = Object.keys(dependencies).filter((dep) => filter({ ...options, dep }));
@@ -37,7 +48,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
     async function mapper(dependencyType, dependency) {
         if (matcher && !matchRegEx.test(dependency)) return newContent;
         const version = content[dependencyType][dependency];
-        const latestVersion = await getLatest(dependency);
+        const latestVersion = await getLatest(dependency, { canary: options.canary });
 
         if (!latestVersion) {
             saveError({ packageName, dependency });
@@ -48,7 +59,8 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
             if (
                 (semVerChange === MAJOR && updateMajors) ||
                 (semVerChange === MINOR && updateMinors) ||
-                (semVerChange === PATCH && updatePatches)
+                (semVerChange === PATCH && updatePatches) ||
+                ([PREMINOR, PREPATCH, PREMAJOR].includes(semVerChange) && updateCanary)
             ) {
                 newContent[dependencyType][dependency] = newVersion;
             }
