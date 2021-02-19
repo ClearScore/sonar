@@ -29,8 +29,8 @@ const { argv } = yargs
     .config(config)
     .pkgConf('sonar')
     .boolean([
-        'local',
-        'sync',
+        'sync-remote',
+        'sync-local',
         'bump',
         'internal',
         'external',
@@ -44,11 +44,14 @@ const { argv } = yargs
         'dryRun',
     ])
     .string('canary')
-    .array(['internal-scopes', 'ignore-scopes'])
+    .string('group')
+    .array(['internal-scopes', 'ignore-scopes', 'groups'])
     .command('ignore-scopes', 'These scopes will be ignored by the updater')
     .command('internal-scopes', 'Flag scopes as internal')
-    .command('local', 'Update local workspace packages to latest version')
-    .command('sync', 'Ensure usages of local workspace packages match the current version')
+    .command('groups', 'Name and flag dependencies into groups')
+    .command('group', 'Specify which group of dependencies to update')
+    .command('sync-remote', 'Update local workspace packages to latest version')
+    .command('sync-local', 'Ensure usages of local workspace packages match the current version')
     .command('bump', 'Update the version number of local packages by a specifies amount (major, minor or patch)')
     .command('internal', 'Update scopes flagged as internal')
     .command('external', 'Update scopes not flagged as internal')
@@ -66,14 +69,16 @@ const { argv } = yargs
     .command('canary', 'Only update thos packages with a canary release matching the given string')
     .example('$0 --major --no-internal babel', 'Update all external dependencies with a name containing babel')
     .example('$0 "babel|postcss|eslint|jest"', 'Update minor versions of babel, postcss, eslint and jest dependencies')
-    .example('$0 --local --sync', 'Ensure all local package versions are up-to-date and in sync')
+    .example('$0 --sync-remote --sync-local', 'Ensure all local package versions are up-to-date and in sync')
     .help('h')
     .alias('h', 'help')
+    .alias('g', 'group')
     .alias('s', 'internalScopes')
     .alias('x', 'ignoreScopes')
-    .alias('l', 'local')
     .alias('i', 'internal')
     .alias('e', 'external')
+    .alias('sync-local', 'syncLocal')
+    .alias('sync-remote', 'syncRemote')
     .alias('deps', 'dependencies')
     .alias('dev', 'devDependencies')
     .alias('peer', 'peerDependencies')
@@ -85,8 +90,8 @@ const { argv } = yargs
         fail: false,
         ignoreScopes: [],
         internalScopes: [],
-        local: false, // it's rare this'll be out-of-date. For example on publish failures
-        sync: true, // we should always aim to have all local packages in sync.
+        syncRemote: false, // it's rare this is needed, but useful for publish failures
+        syncLocal: true, // we should always aim to have all local packages in sync.
         bump: false,
         internal: true,
         external: true,
@@ -99,6 +104,8 @@ const { argv } = yargs
         folder: '.',
         concurrency: 10,
         canary: '',
+        groups: [],
+        group: [],
     });
 
 const { folder, dryRun, concurrency = 10, fail } = argv;
@@ -112,8 +119,8 @@ const types = [argv.deps && 'dependencies', argv.dev && 'devDependencies', argv.
 const owners = [
     argv.internal && 'internal',
     argv.external && 'external',
-    argv.local && 'local',
-    argv.sync && 'sync-local',
+    argv.syncRemote && 'sync-remote',
+    argv.syncLocal && 'sync-local',
 ]
     .filter(Boolean)
     .join(', ');
@@ -167,7 +174,7 @@ FileHound.create()
         let updatedFiles = files;
         const localPackages = {};
         log(`Found ${files.length} local package.json files`);
-        if (argv.local) {
+        if (argv.syncRemote) {
             const depsBar = new ProgressBar('  Checking local package versions [:bar] :percent', {
                 total: files.length,
             });

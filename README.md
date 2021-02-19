@@ -26,14 +26,14 @@ It is useful to ensure all usages of any packages from the local workspace are a
 
 ```sh
 # yarn sonar:local-sync
-sonar --no-external --no-internal --sync --local
+sonar --no-external --no-internal --sync-local --sync-remote
 ```
 
 If you want to bump all packages e.g. after an update, or a filed CI publish job. This will give you an prompt to state to bump by major, minor or patch.
 
 ```sh
 # yarn sonar:bump
-sonar --no-external --no-internal --sync --local --bump
+sonar --no-external --no-internal --sync-local --sync-remote --bump
 ```
 
 #### internally scoped packages (recommended: daily)
@@ -82,8 +82,8 @@ Alternatively, using a `sonar.config.js`, or the [CLI options](#cli-options), yo
 Commands:
   sonar internal              Update scopes flagged as internal
   sonar external              Update scopes not flagged as internal
-  sonar local                 Update dependencies which are local packages
-  sonar sync                  Keep usages of local pakages in sync with the current versions
+  sonar syncRemote            Update dependencies which are local packages
+  sonar syncLocal             Keep usages of local pakages in sync with the current versions
   sonar bump                  Bump local packages by a specified amount (major, minor or patch)
   sonar ignoreScopes          This scopes will be ignored by the updater
   sonar internalScopes        Flag scopes as internal
@@ -108,14 +108,14 @@ Options:
   --major                                             [boolean] [default: false]
   --minor                                              [boolean] [default: true]
   --patch                                              [boolean] [default: true]
-  --sync                                               [boolean] [default: true]
+  --syncLocal                                          [boolean] [default: true]
+  --syncRemote                                        [boolean] [default: false]
   --bump                                              [boolean] [default: false]
   --folder                                                        [default: "."]
   --concurrency                                                    [default: 10]
   --canary                                                         [default: ""]
   -x, --ignoreScopes                                       [array] [default: []]
   -s, --internalScopes                                     [array] [default: []]
-  -l, --local                                         [boolean] [default: false]
   -i, --internal                                       [boolean] [default: true]
   -e, --external                                       [boolean] [default: true]
   --deps, --dependencies                               [boolean] [default: true]
@@ -126,7 +126,7 @@ Examples:
   sonar --major --no-internal babel  Update all external dependencies with a name containing babel
   sonar "babel|postcss|eslint|jest"  Update minor versions of babel, postcss, eslint and jest dependencies
   sonar --canary feat-update         Update all dependencies with a release containing feat-update
-  sonar --local --sync               Update workspace package versions and ensure all useages are up-to-dae
+  sonar --syncRemote --syncLocal     Update workspace package versions and ensure all useages are up-to-dae
 
 ```
 
@@ -152,7 +152,3 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 **Output**
 
 ![image](https://user-images.githubusercontent.com/1727939/75665226-bff54600-5c6b-11ea-8ee1-69885ea0c11d.png)
-
-## todo:
-
-- add --group.custom-group or groups: { [name]: [regex] }

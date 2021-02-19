@@ -28,9 +28,11 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 
 const updateVersions = async (content, saveError, options = {}, depsBar, localPackages = {}) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
-    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary, sync } = options;
+    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary, syncLocal, group } = options;
     const matcher = pattern || (options._ && options._[0]) || '';
+    const groupMatcher = (options.groups && options.groups[group]) || '';
     const matchRegEx = new RegExp(matcher, 'i');
+    const groupRegEx = new RegExp(groupMatcher, 'i');
     const newContent = { ...content };
 
     // alias cli args to help code make more sense
@@ -49,7 +51,13 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
 
     async function mapper(dependencyType, dependency) {
         const isLocal = !!localPackages[dependency];
-        if ((matcher && !matchRegEx.test(dependency)) || (isLocal && !sync)) return newContent;
+        if (
+            (matcher && !matchRegEx.test(dependency)) ||
+            (groupMatcher && !groupRegEx.test(dependency)) ||
+            (isLocal && !syncLocal)
+        ) {
+            return newContent;
+        }
         const version = content[dependencyType][dependency];
         const localPackageVersion = localPackages[dependency];
         const latestVersion = await (localPackageVersion || getLatest(dependency, { canary: options.canary }));
@@ -61,7 +69,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
             saveError({ packageName, semVerChange, dependency, version, newVersion });
 
             if (
-                (isLocal && sync) ||
+                (isLocal && syncLocal) ||
                 (semVerChange === PRERELEASE && updatePatches) ||
                 (semVerChange === MAJOR && updateMajors) ||
                 (semVerChange === MINOR && updateMinors) ||
