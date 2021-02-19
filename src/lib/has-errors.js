@@ -25,7 +25,7 @@ function errorFactory({ major, minor, patch }) {
 
             Object.keys(errors)
                 .filter((key) => ![PATCH, MINOR, MAJOR].includes(key))
-                .forEach(function logUnknownSemVerTypes(errorType) {
+                .forEach((errorType) => {
                     title(`--- ${errorType} (${errors[errorType].length}) ---`);
                     errors[errorType].sort().forEach((e) => log(e));
                 });

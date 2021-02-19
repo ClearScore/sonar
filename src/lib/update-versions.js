@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 const pMapSeries = require('p-map');
+const semver = require('semver');
 
 const { getLatestFactory } = require('./get-latest');
 const { update } = require('./update-version');
@@ -52,7 +53,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
 
         if (!latestVersion) {
             saveError({ packageName, dependency });
-        } else if (latestVersion !== version) {
+        } else if (!semver.satisfies(latestVersion, version)) {
             const { newVersion, semVerChange } = update({ version, latestVersion });
             saveError({ packageName, semVerChange, dependency, version, newVersion });
 

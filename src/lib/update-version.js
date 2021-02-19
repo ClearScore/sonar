@@ -1,5 +1,4 @@
 const semver = require('semver');
-const semverDiff = require('semver-diff');
 
 const { MINOR, PATCH } = require('./consts');
 
@@ -30,8 +29,8 @@ const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
 };
 
 const update = ({ version, latestVersion }) => {
-    const coercedVersion = semver.coerce(version).version;
-    const semVerChange = semverDiff(coercedVersion, latestVersion);
+    const coercedVersion = semver.coerce(version);
+    const semVerChange = semver.diff(coercedVersion, latestVersion);
     const newVersion = replaceWildCards({ version, latestVersion, semVerChange });
     return { newVersion, semVerChange };
 };
