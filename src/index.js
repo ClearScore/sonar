@@ -91,6 +91,19 @@ const { argv } = yargs
 const { folder, dryRun, concurrency = 10, fail } = argv;
 const { saveError, logErrors } = errorFactory(argv);
 
+// validate + output config
+const semVer = [argv.patch && 'patch', argv.minor && 'minor', argv.major && 'major'].filter(Boolean).join(', ');
+const types = [argv.deps && 'dependencies', argv.dev && 'devDependencies', argv.peer && 'peerDependencies']
+    .filter(Boolean)
+    .join(', ');
+const owners = [argv.internal && 'internal', argv.external && 'external'].filter(Boolean).join(', ');
+log(`|`);
+log(`|   ${chalk.bold('is Dry-run?:')} ${argv.dryRun}`);
+log(`|   ${chalk.bold('SemVer:')} ${semVer}`);
+log(`|   ${chalk.bold('Types:')} ${types}`);
+log(`|   ${chalk.bold('Groups:')} ${owners}`);
+log(`|\n`);
+
 /**
  * Find me all the package.json files (though not if they are within a node_modules folder)
  * @type {*|Array|{index: number, input: string}}
@@ -103,44 +116,52 @@ FileHound.create()
     .match('package.json')
     .find()
     .then((paths) => {
-        // validate + output config
-        const semVer = [argv.patch && 'patch', argv.minor && 'minor', argv.major && 'major'].filter(Boolean).join(', ');
-        const types = [argv.deps && 'dependencies', argv.dev && 'devDependencies', argv.peer && 'peerDependencies']
-            .filter(Boolean)
-            .join(', ');
-        const owners = [argv.internal && 'internal', argv.external && 'external'].filter(Boolean).join(', ');
-        log(`|`);
-        log(`|   ${chalk.bold('is Dry-run?:')} ${argv.dryRun}`);
-        log(`|   ${chalk.bold('SemVer:')} ${semVer}`);
-        log(`|   ${chalk.bold('Types:')} ${types}`);
-        log(`|   ${chalk.bold('Groups:')} ${owners}`);
-        log(`|\n`);
-        return paths;
-    })
-    .then((paths) => {
         // read all package jsons
         const files = paths.map((path) => jsonfile.readFile(path));
         return pMap(files, (file, index) => ({ path: paths[index], file }), { concurrency });
     })
-    .then((files) => {
+    .then(async (files) => {
         // count deps + return update json
+        const localPackages = {};
         const potentialDeps = files.reduce(
-            (prev, { file }) =>
-                prev +
-                (file.dependencies && argv.dependencies ? Object.keys(file.dependencies).length : 0) +
-                (file.devDependencies && argv.devDependencies ? Object.keys(file.devDependencies).length : 0) +
-                (file.peerDependencies && argv.peerDependencies ? Object.keys(file.peerDependencies).length : 0),
-            0,
+            (prev, { file }) => {
+                localPackages[file.name] = file.version;
+
+                const includeDeps = file.dependencies && argv.dependencies;
+                const includeDevDeps = file.devDependencies && argv.devDependencies;
+                const includePeerDeps = file.peerDependencies && argv.peerDependencies;
+
+                const depCount =
+                    (includeDeps ? Object.keys(file.dependencies).length : 0) +
+                    (includeDevDeps ? Object.keys(file.devDependencies).length : 0) +
+                    (includePeerDeps ? Object.keys(file.peerDependencies).length : 0);
+
+                const uniqueDeps = {
+                    ...(includeDeps ? file.dependencies : {}),
+                    ...(includeDevDeps ? file.devDependencies : {}),
+                    ...(includePeerDeps ? file.peerDependencies : {}),
+                };
+
+                return {
+                    ...prev,
+                    depCount: prev.depCount + depCount,
+                    uniqueDeps: { ...prev.uniqueDeps, ...uniqueDeps },
+                };
+            },
+            { depCount: 0, uniqueDeps: {} },
         );
-        log(`Found ${files.length} packages ...with ${potentialDeps} dependencies\n`);
-        const depsBar = new ProgressBar('  Checking dependencies [:bar] :percent', { total: potentialDeps });
-        const filesToUpdate = files.map(({ file }) => updateVersions(file, saveError, argv, depsBar));
+        const uniqueDepCount = Object.keys(potentialDeps.uniqueDeps).length;
+        log(`Found ${files.length} local package.json's ...with ${uniqueDepCount} unique dependencies\n`);
+        const depsBar = new ProgressBar('  Checking dependencies [:bar] :percent', { total: potentialDeps.depCount });
+        const filesToUpdate = files.map(({ file }) => updateVersions(file, saveError, argv, depsBar, localPackages));
         const updates = (update, index) => ({ update, path: files[index].path });
-        return pMap(filesToUpdate, updates, { concurrency });
+        const results = await pMap(filesToUpdate, updates, { concurrency });
+        return results;
     })
     .then((updates) => {
         // write updated json to package.json files
         if (dryRun) return;
+        log(`Updating ${updates.length} package.json's\n`);
         const writeBar = new ProgressBar('  Writing files [:bar] :percent', { total: updates.length });
         const updater = ({ update, path }) => {
             writeBar.tick();

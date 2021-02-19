@@ -25,7 +25,7 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
     return true;
 };
 
-const updateVersions = async (content, saveError, options = {}, depsBar) => {
+const updateVersions = async (content, saveError, options = {}, depsBar, localPackages = {}) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
     const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary } = options;
     const matcher = pattern || (options._ && options._[0]) || '';
@@ -49,7 +49,8 @@ const updateVersions = async (content, saveError, options = {}, depsBar) => {
     async function mapper(dependencyType, dependency) {
         if (matcher && !matchRegEx.test(dependency)) return newContent;
         const version = content[dependencyType][dependency];
-        const latestVersion = await getLatest(dependency, { canary: options.canary });
+        const localPackageVersion = localPackages[dependency];
+        const latestVersion = await (localPackageVersion || getLatest(dependency, { canary: options.canary }));
 
         if (!latestVersion) {
             saveError({ packageName, dependency });
