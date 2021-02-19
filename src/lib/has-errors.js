@@ -7,9 +7,14 @@ function errorFactory({ major, minor, patch }) {
 
     const logInfo = (type, hasType) => {
         if (!errors[type]) return;
-        title(`--- ${type.toUpperCase()} (${errors[type].length}) ---`);
+        title(`--- ${type.toUpperCase()} (${Object.keys(errors[type]).length}) ---`);
         if (hasType) {
-            errors[type].sort().forEach((e) => log(e));
+            Object.keys(errors[type])
+                .sort()
+                .forEach((dependency) => {
+                    const { version, newVersion } = errors[type][dependency];
+                    log(` ${dependency} : ${version} => ${newVersion}`);
+                });
         } else {
             log(`To update ${type}, run with: --${type}`);
             log(`To see possible ${type} updates, run with: --${type} --dry-run`);
@@ -26,8 +31,13 @@ function errorFactory({ major, minor, patch }) {
             Object.keys(errors)
                 .filter((key) => ![PATCH, MINOR, MAJOR].includes(key))
                 .forEach((errorType) => {
-                    title(`--- ${errorType} (${errors[errorType].length}) ---`);
-                    errors[errorType].sort().forEach((e) => log(e));
+                    title(`--- ${errorType} (${Object.keys(errors[errorType]).length}) ---`);
+                    Object.keys(errors[errorType])
+                        .sort()
+                        .forEach((dependency) => {
+                            const { version, newVersion } = errors[errorType][dependency];
+                            log(` ${dependency} : ${version} => ${newVersion}`);
+                        });
                 });
 
             error('Dependencies out of date');
@@ -41,10 +51,16 @@ function errorFactory({ major, minor, patch }) {
             return;
         }
 
-        errors[semVerChange] = [
-            ...(errors[semVerChange] || []),
-            `${packageName} : ${dependency}@${version} => ${newVersion}`,
-        ];
+        const parents =
+            (errors[semVerChange] && errors[semVerChange][dependency] && errors[semVerChange][dependency].parent) || [];
+        errors[semVerChange] = {
+            ...errors[semVerChange],
+            [dependency]: {
+                version,
+                newVersion,
+                parent: [...parents, packageName],
+            },
+        };
     }
 
     return {

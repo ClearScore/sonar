@@ -14,24 +14,56 @@ e.g. `sonar --patch`.
 Working to keep mono-repo dependencies up-to-date and in sync can take time.
 Sonar makes our lives easier by automating these sem-ver updates.
 
-### Our workflow
+### Use cases
 
-We use Sonar daily to keep all our internally created scopes up to date.
+_I would highly recommend you create an npm-script to alias and create shortcuts for each of these commands_
+
+#### Working with Local packages
+
+> local packages are those within the current workspace and repo
+
+It is useful to ensure all usages of any packages from the local workspace are always up to date. These might have fallen out of date after a bad git rebase.
 
 ```sh
+# yarn sonar:local-sync
+sonar --no-external --no-internal --sync --local
+```
+
+If you want to bump all packages e.g. after an update, or a filed CI publish job. This will give you an prompt to state to bump by major, minor or patch.
+
+```sh
+# yarn sonar:bump
+sonar --no-external --no-internal --sync --local --bump
+```
+
+#### internally scoped packages (recommended: daily)
+
+> 'Internal' scopes are those packages that are created in-house, but maybe in other repos.
+
+Use Sonar daily to keep all internal scopes up-to-date.
+
+```sh
+# yarn sonar:internal
 sonar --no-external
 ```
 
-Then every month we use Sonar to update external updates which dont have breaking changes.
+#### External scoped packages (recommended: daily)
+
+Then every fortnight we use Sonar to update external updates which dont have breaking changes.
 
 ```sh
+# yarn sonar:external
 sonar --no-internal
 ```
 
 Monthly, we also gauge how many external dependencies have had major releases. This helps us plan how much time we need to spend on this new tech-debt and when we should make the updates.
 
 ```sh
+# yarn sonar:dry-major
 sonar --no-internal --major --dry-run
+
+# yarn sonar:major
+sonar --no-internal --major
 ```
 
 ## Config
@@ -48,24 +80,25 @@ Alternatively, using a `sonar.config.js`, or the [CLI options](#cli-options), yo
 
 ```sh
 Commands:
-  sonar ignoreScopes      This scopes will be ignored by the updater
-  sonar internalScopes    Flag scopes as internal
-  sonar internal          Update scopes flagged as internal
-  sonar external          Update scopes not marked as internal
-  sonar patch             Update to the latest patch semantic version
-  sonar minor             Update to the latest minor semantic version
-  sonar major             Update to the latest major semantic version
-  sonar dependencies      Update dependencies
-  sonar devDependencies   Update devDependencies
-  sonar peerDependencies  Update peerDependencies
-  sonar fail              Terminate the process with an error if there are
-                                out of date packages
-  sonar dryRun            Run the process, without actually updating any
-                                files
-  sonar pattern           Only check packages matching the given pattern
-  sonar folder            Where to look for package.json files
-  sonar concurrency       Change how many promises to run concurrently
-  sonar canary            target only those packages that have the specified carnary release
+  sonar internal              Update scopes flagged as internal
+  sonar external              Update scopes not flagged as internal
+  sonar local                 Update dependencies which are local packages
+  sonar sync                  Keep usages of local pakages in sync with the current versions
+  sonar bump                  Bump local packages by a specified amount (major, minor or patch)
+  sonar ignoreScopes          This scopes will be ignored by the updater
+  sonar internalScopes        Flag scopes as internal
+  sonar patch                 Update to the latest patch semantic version
+  sonar minor                 Update to the latest minor semantic version
+  sonar major                 Update to the latest major semantic version
+  sonar dependencies          Update dependencies
+  sonar devDependencies       Update devDependencies
+  sonar peerDependencies      Update peerDependencies
+  sonar fail                  Terminate the process with an error if there are out of date packages
+  sonar dryRun                Run the process, without actually updating any files
+  sonar pattern               Only check packages matching the given pattern
+  sonar folder                Where to look for package.json files
+  sonar concurrency           Change how many promises to run concurrently
+  sonar canary                target only those packages that have the specified carnary release
 
 Options:
   --version                   Show version number                      [boolean]
@@ -75,11 +108,14 @@ Options:
   --major                                             [boolean] [default: false]
   --minor                                              [boolean] [default: true]
   --patch                                              [boolean] [default: true]
+  --sync                                               [boolean] [default: true]
+  --bump                                              [boolean] [default: false]
   --folder                                                        [default: "."]
   --concurrency                                                    [default: 10]
   --canary                                                         [default: ""]
   -x, --ignoreScopes                                       [array] [default: []]
   -s, --internalScopes                                     [array] [default: []]
+  -l, --local                                         [boolean] [default: false]
   -i, --internal                                       [boolean] [default: true]
   -e, --external                                       [boolean] [default: true]
   --deps, --dependencies                               [boolean] [default: true]
@@ -90,6 +126,7 @@ Examples:
   sonar --major --no-internal babel  Update all external dependencies with a name containing babel
   sonar "babel|postcss|eslint|jest"  Update minor versions of babel, postcss, eslint and jest dependencies
   sonar --canary feat-update         Update all dependencies with a release containing feat-update
+  sonar --local --sync               Update workspace package versions and ensure all useages are up-to-dae
 
 ```
 
@@ -115,3 +152,7 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 **Output**
 
 ![image](https://user-images.githubusercontent.com/1727939/75665226-bff54600-5c6b-11ea-8ee1-69885ea0c11d.png)
+
+## todo:
+
+- add --group.custom-group or groups: { [name]: [regex] }

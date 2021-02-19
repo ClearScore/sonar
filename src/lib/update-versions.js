@@ -8,6 +8,7 @@ const {
     MAJOR,
     MINOR,
     PATCH,
+    PRERELEASE,
     PREMINOR,
     PREPATCH,
     PREMAJOR,
@@ -27,7 +28,7 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 
 const updateVersions = async (content, saveError, options = {}, depsBar, localPackages = {}) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
-    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary } = options;
+    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary, sync } = options;
     const matcher = pattern || (options._ && options._[0]) || '';
     const matchRegEx = new RegExp(matcher, 'i');
     const newContent = { ...content };
@@ -47,7 +48,8 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
     const peerDepsToUpdate = Object.keys(peerDependencies).filter((dep) => filter({ ...options, dep }));
 
     async function mapper(dependencyType, dependency) {
-        if (matcher && !matchRegEx.test(dependency)) return newContent;
+        const isLocal = !!localPackages[dependency];
+        if ((matcher && !matchRegEx.test(dependency)) || (isLocal && !sync)) return newContent;
         const version = content[dependencyType][dependency];
         const localPackageVersion = localPackages[dependency];
         const latestVersion = await (localPackageVersion || getLatest(dependency, { canary: options.canary }));
@@ -59,6 +61,8 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
             saveError({ packageName, semVerChange, dependency, version, newVersion });
 
             if (
+                (isLocal && sync) ||
+                (semVerChange === PRERELEASE && updatePatches) ||
                 (semVerChange === MAJOR && updateMajors) ||
                 (semVerChange === MINOR && updateMinors) ||
                 (semVerChange === PATCH && updatePatches) ||

@@ -2,6 +2,7 @@
 const MAJOR = 'major';
 const MINOR = 'minor';
 const PATCH = 'patch';
+const PRERELEASE = 'prerelease';
 const PREMINOR = 'preminor';
 const PREPATCH = 'prepatch';
 const PREMAJOR = 'premajor';
@@ -13,6 +14,7 @@ module.exports = {
     MAJOR,
     MINOR,
     PATCH,
+    PRERELEASE,
     PREMINOR,
     PREPATCH,
     PREMAJOR,

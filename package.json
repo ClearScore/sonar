@@ -52,6 +52,7 @@
     "file-loader": "6.2.0",
     "filehound": "1.17.4",
     "find-up": "5.0.0",
+    "inquirer": "7.3.3",
     "jsonfile": "6.1.0",
     "latest-version": "5.1.0",
     "p-map": "4.0.0",
