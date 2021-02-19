@@ -16,13 +16,16 @@ async function getLatestFromRepo(pck, options) {
 
 function getLatestFactory() {
     const checkedCache = {};
+    const fetchingCache = {};
+
     return async function getLatest(dep, options) {
-        if (checkedCache[dep]) {
+        if (typeof checkedCache[dep] !== 'undefined') {
             return checkedCache[dep];
         }
-        const latestVersion = await getLatestFromRepo(dep, options);
-        checkedCache[dep] = latestVersion;
-        return latestVersion;
+        // do not await on this line, so that multiple requests dont all go to the server
+        fetchingCache[dep] = fetchingCache[dep] || getLatestFromRepo(dep, options);
+        checkedCache[dep] = await fetchingCache[dep];
+        return checkedCache[dep];
     };
 }
 
