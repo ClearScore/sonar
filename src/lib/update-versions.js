@@ -19,7 +19,20 @@ const {
 
 const getLatest = getLatestFactory();
 
-const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
+const filter = ({
+    internal,
+    external,
+    dep,
+    internalScopes,
+    ignoreScopes,
+    localPackages,
+    bump,
+    syncRemote,
+    syncLocal,
+}) => {
+    const isLocalWorkflowUpdate = bump || syncRemote || syncLocal;
+    // if we're doing a local update, only attempt to affect local packages.
+    if (isLocalWorkflowUpdate) return localPackages[dep];
     if (internal && external) return true;
     if (internal) return internalScopes.includes(dep.split('/')[0]);
     if (external) return !internalScopes.includes(dep.split('/')[0]) && !ignoreScopes.includes(dep.split('/')[0]);
@@ -28,7 +41,7 @@ const filter = ({ internal, external, dep, internalScopes, ignoreScopes }) => {
 
 const updateVersions = async (content, saveError, options = {}, depsBar, localPackages = {}) => {
     const { name: packageName, dependencies = {}, devDependencies = {}, peerDependencies = {} } = content;
-    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary, syncLocal, group } = options;
+    const { major, minor, patch, deps, dev, peer, concurrency, pattern, canary, group } = options;
     const matcher = pattern || (options._ && options._[0]) || '';
     const groupMatcher = (options.groups && options.groups[group]) || '';
     const matchRegEx = new RegExp(matcher, 'i');
@@ -45,16 +58,16 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
     const updateCanary = canary;
 
     // filter out deps we dont want to update
-    const depsToUpdate = Object.keys(dependencies).filter((dep) => filter({ ...options, dep }));
-    const devDepsToUpdate = Object.keys(devDependencies).filter((dep) => filter({ ...options, dep }));
-    const peerDepsToUpdate = Object.keys(peerDependencies).filter((dep) => filter({ ...options, dep }));
+    const depsToUpdate = Object.keys(dependencies).filter((dep) => filter({ ...options, localPackages, dep }));
+    const devDepsToUpdate = Object.keys(devDependencies).filter((dep) => filter({ ...options, localPackages, dep }));
+    const peerDepsToUpdate = Object.keys(peerDependencies).filter((dep) => filter({ ...options, localPackages, dep }));
 
     async function mapper(dependencyType, dependency) {
         const isLocal = !!localPackages[dependency];
         if (
             (matcher && !matchRegEx.test(dependency)) ||
             (groupMatcher && !groupRegEx.test(dependency)) ||
-            (isLocal && !syncLocal)
+            (isLocal && !options.syncLocal && !options.bump && !options.syncRemote)
         ) {
             return newContent;
         }
@@ -69,7 +82,7 @@ const updateVersions = async (content, saveError, options = {}, depsBar, localPa
             saveError({ packageName, semVerChange, dependency, version, newVersion });
 
             if (
-                (isLocal && syncLocal) ||
+                (isLocal && (options.syncLocal || options.bump || options.syncRemote)) ||
                 (semVerChange === PRERELEASE && updatePatches) ||
                 (semVerChange === MAJOR && updateMajors) ||
                 (semVerChange === MINOR && updateMinors) ||

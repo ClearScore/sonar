@@ -22,25 +22,48 @@ _I would highly recommend you create an npm-script to alias and create shortcuts
 
 > local packages are those within the current workspace and repo
 
-It is useful to ensure all usages of any packages from the local workspace are always up to date. These might have fallen out of date after a bad git rebase.
+##### sync-local
+
+It is useful to ensure all usages of any packages from the local workspace are always in sync within the monorepo. These might have fallen out of sync after a bad git rebase.
 
 ```sh
-# yarn sonar:local-sync
-sonar --no-external --no-internal --sync-local --sync-remote
+# yarn sonar:sync-local
+sonar --sync-local
 ```
 
-If you want to bump all packages e.g. after an update, or a filed CI publish job. This will give you an prompt to state to bump by major, minor or patch.
+_using `--sync-local` will only update affected packages, i.e. Sonar will not then run patch updates on the external dependencies._
+
+##### sync-remote
+
+Ensure all packages are up to date. These might have fallen out of date after a bad publish. This will also ensure usages of the changed packages are kept in sync.
+
+**Recommendation**: Don't forget to ensure you are either on the latest master branch, or has rebased from master first!
+
+```sh
+# yarn sonar:sync-remote
+sonar --sync-remote
+```
+
+_using `--sync-remote` will only update affected packages, i.e. Sonar will not then run patch updates on the external dependencies._
+
+##### bump
+
+If you want to bump all packages e.g. after an update, or a filed CI publish job. This will give you a prompt to state to bump by major, minor or patch.
+
+**Recommendation**: use with `--sync-remote` to keep everything up to date on each run
 
 ```sh
 # yarn sonar:bump
-sonar --no-external --no-internal --sync-local --sync-remote --bump
+sonar --bump --sync-remote
 ```
+
+_using `--bump` will only update affected packages, i.e. Sonar will not then run patch updates on the external dependencies._
 
 #### internally scoped packages (recommended: daily)
 
-> 'Internal' scopes are those packages that are created in-house, but maybe in other repos.
+> 'Internal' scopes are those packages that are created in-house, that may live in other repos.
 
-Use Sonar daily to keep all internal scopes up-to-date.
+Use Sonar daily to keep all 'internal' scopes up-to-date.
 
 ```sh
 # yarn sonar:internal
@@ -48,6 +71,8 @@ sonar --no-external
 ```
 
 #### External scoped packages (recommended: daily)
+
+> 'External' scopes are those packages that are not marked as 'internal' (above).
 
 Then every fortnight we use Sonar to update external updates which dont have breaking changes.
 
@@ -60,10 +85,10 @@ Monthly, we also gauge how many external dependencies have had major releases. T
 
 ```sh
 # yarn sonar:dry-major
-sonar --no-internal --major --dry-run
+sonar --major --dry-run
 
 # yarn sonar:major
-sonar --no-internal --major
+sonar --major
 ```
 
 ## Config

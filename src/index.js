@@ -174,13 +174,15 @@ FileHound.create()
         let updatedFiles = files;
         const localPackages = {};
         log(`Found ${files.length} local package.json files`);
-        if (argv.syncRemote) {
+        if (argv.syncRemote || localBumps) {
             const depsBar = new ProgressBar('  Checking local package versions [:bar] :percent', {
                 total: files.length,
             });
             const mapper = async ({ file, path }) => {
-                const remoteVersion = await getLatest(file.name, { canary: argv.canary });
-                localPackages[file.name] = remoteVersion || file.version;
+                const latestVersion = argv.syncRemote
+                    ? await getLatest(file.name, { canary: argv.canary })
+                    : file.version;
+                localPackages[file.name] = latestVersion;
                 if (localBumps) {
                     localPackages[file.name] = semver.inc(localPackages[file.name], localBumps);
                 }
