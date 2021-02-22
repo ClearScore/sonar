@@ -19,19 +19,9 @@ const {
 
 const getLatest = getLatestFactory();
 
-const filter = ({
-    internal,
-    external,
-    dep,
-    internalScopes,
-    ignoreScopes,
-    localPackages,
-    bump,
-    syncRemote,
-    syncLocal,
-}) => {
-    const isLocalWorkflowUpdate = bump || syncRemote || syncLocal;
-    // if we're doing a local update, only attempt to affect local packages.
+const filter = ({ internal, external, dep, internalScopes, ignoreScopes, localPackages, bump, syncRemote }) => {
+    const isLocalWorkflowUpdate = bump || syncRemote;
+    // if we're doing a bump or a remote-sync, only attempt to affect local packages.
     if (isLocalWorkflowUpdate) return localPackages[dep];
     if (internal && external) return true;
     if (internal) return internalScopes.includes(dep.split('/')[0]);

@@ -31,8 +31,6 @@ It is useful to ensure all usages of any packages from the local workspace are a
 sonar --sync-local
 ```
 
-_using `--sync-local` will only update affected packages, i.e. Sonar will not then run patch updates on the external dependencies._
-
 ##### sync-remote
 
 Ensure all packages are up to date. These might have fallen out of date after a bad publish. This will also ensure usages of the changed packages are kept in sync.
