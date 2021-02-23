@@ -29,10 +29,13 @@ const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
 };
 
 const update = ({ version, latestVersion }) => {
+    if (!version) return null;
+    const depSatisfied = semver.satisfies(latestVersion, version);
     const coercedVersion = semver.coerce(version);
     const semVerChange = semver.diff(coercedVersion, latestVersion);
     const newVersion = replaceWildCards({ version, latestVersion, semVerChange });
-    return { newVersion, semVerChange };
+    // only return update is
+    return !depSatisfied ? { newVersion, semVerChange } : null;
 };
 
 module.exports = { replaceWildCards, getWildCards, update };

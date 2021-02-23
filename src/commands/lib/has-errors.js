@@ -7,8 +7,8 @@ function errorFactory({ major, minor, patch }) {
 
     const logInfo = (type, hasType) => {
         if (!errors[type]) return;
-        title(`--- ${type.toUpperCase()} (${Object.keys(errors[type]).length}) ---`);
         if (hasType) {
+            title(`--- ${type.toUpperCase()} (${Object.keys(errors[type]).length}) ---`);
             Object.keys(errors[type])
                 .sort()
                 .forEach((dependency) => {
@@ -16,8 +16,7 @@ function errorFactory({ major, minor, patch }) {
                     log(` ${dependency} : ${version} => ${newVersion}`);
                 });
         } else {
-            log(`To update ${type}, run with: --${type}`);
-            log(`To see possible ${type} updates, run with: --${type} --dry-run`);
+            log(`${Object.keys(errors[type]).length} '${type}' updates not include; run with: --${type} [--fix]`);
         }
     };
 
@@ -45,20 +44,17 @@ function errorFactory({ major, minor, patch }) {
         return hasErrors;
     }
 
-    function saveError({ semVerChange, packageName, dependency, version, newVersion }) {
+    function saveError({ semVerChange, dependency, version, newVersion }) {
         if (!newVersion) {
-            error(`${packageName} : ${dependency} => unknown version`);
+            error(`${dependency} => Could not find latest version`);
             return;
         }
 
-        const parents =
-            (errors[semVerChange] && errors[semVerChange][dependency] && errors[semVerChange][dependency].parent) || [];
         errors[semVerChange] = {
             ...errors[semVerChange],
             [dependency]: {
                 version,
                 newVersion,
-                parent: [...parents, packageName],
             },
         };
     }

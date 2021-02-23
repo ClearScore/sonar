@@ -48,10 +48,10 @@ describe('wild-cards', () => {
                 expect(update({ version, latestVersion })).toEqual({ newVersion: '1.1.2', semVerChange: PATCH });
             });
 
-            it('return version with a patch wild and only patch update', () => {
+            it('returns null since no change is needed for a version with a patch wild and only patch update', () => {
                 const version = '1.1.x';
                 const latestVersion = '1.1.2';
-                expect(update({ version, latestVersion })).toEqual({ newVersion: '1.1.x', semVerChange: PATCH });
+                expect(update({ version, latestVersion })).toBeNull();
             });
 
             it('return latestVersion with a patch wild and minor update', () => {
@@ -60,10 +60,10 @@ describe('wild-cards', () => {
                 expect(update({ version, latestVersion })).toEqual({ newVersion: '1.2.x', semVerChange: MINOR });
             });
 
-            it('return latestVersion with a patch tilda and patch update', () => {
+            it('return null since no change is needed for a patch tilda and patch update', () => {
                 const version = '~1.1.1';
                 const latestVersion = '1.1.2';
-                expect(update({ version, latestVersion })).toEqual({ newVersion: '~1.1.1', semVerChange: PATCH });
+                expect(update({ version, latestVersion })).toBeNull();
             });
 
             it('return latestVersion with a patch tilda and minor update', () => {
@@ -80,22 +80,22 @@ describe('wild-cards', () => {
                 expect(update({ version, latestVersion })).toEqual({ newVersion: '1.2.2', semVerChange: MINOR });
             });
 
-            it('return version with a minor wild', () => {
+            it('return null since no change is needed for  with a minor wild', () => {
                 const version = '1.x.x';
                 const latestVersion = '1.2.2';
-                expect(update({ version, latestVersion })).toEqual({ newVersion: '1.x', semVerChange: MINOR });
+                expect(update({ version, latestVersion })).toBeNull();
             });
 
-            it('return version with a minor hat', () => {
+            it('return null since no change is needed for a minor hat', () => {
                 const version = '^1.1.1';
                 const latestVersion = '1.2.2';
-                expect(update({ version, latestVersion })).toEqual({ newVersion: '^1.1.1', semVerChange: MINOR });
+                expect(update({ version, latestVersion })).toBeNull();
             });
 
-            it('return version with a minor hat and a patch update', () => {
+            it('return null since no change is needed for a minor hat and a patch update', () => {
                 const version = '^1.1.1';
                 const latestVersion = '1.1.2';
-                expect(update({ version, latestVersion })).toEqual({ newVersion: '^1.1.1', semVerChange: PATCH });
+                expect(update({ version, latestVersion })).toBeNull();
             });
         });
     });
