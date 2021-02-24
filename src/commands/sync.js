@@ -1,6 +1,5 @@
 // Yargs module:
 // https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
-
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const jsonfile = require('jsonfile');
@@ -11,7 +10,7 @@ const semver = require('semver');
 const getFiles = require('./lib/get-package-jsons');
 const updateVersions = require('./lib/set-dependency-versions');
 const { getLatestFactory } = require('./lib/get-latest');
-const { log } = require('./lib/log');
+const { log, success, error } = require('./lib/log');
 const { errorFactory } = require('./lib/has-errors');
 
 const getLatest = getLatestFactory();
@@ -147,9 +146,11 @@ exports.handler = async function handler(argv) {
     await pMap(updatedFiles, depsMapper, { concurrency: argv.concurrency });
 
     if (argv.bump || argv.fix) {
-        log(`Updated ${depsChanges} files with out of sync dependencies`);
+        success(`Updated ${depsChanges} files with out of sync dependencies`);
+    } else if (depsChanges === 0) {
+        success(`Found no out of sync dependencies`);
     } else {
-        log(`Found ${depsChanges} files with out of sync dependencies`);
+        error(`Found ${depsChanges} files with out of sync dependencies`);
     }
     depsBar.terminate();
 

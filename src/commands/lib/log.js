@@ -3,6 +3,7 @@ const chalk = require('chalk');
 
 const branding = chalk.bgBlue.whiteBright(' Sonar ');
 const errorBranding = chalk.bgRed.whiteBright(' Sonar ');
+const successBranding = chalk.bgGreen.whiteBright(' Sonar ');
 
 module.exports = {
     branding,
@@ -14,5 +15,8 @@ module.exports = {
     },
     error: function error(message) {
         return console.error(`\n${errorBranding} ${chalk.red(message)}\n`);
+    },
+    success: function error(message) {
+        return console.error(`\n${successBranding} ${chalk.green(message)}\n`);
     },
 };
