@@ -31,7 +31,7 @@ sonar [cmd] [options] [--fix] [--fail]
 - [Validation](#validation)
   - [default](#validate-default): `sonar validate`
 
-Sonar give you the ability to fine-tune these workflows for local development and CI. By default, zero config needed and out of the box, Sonar will 'patch' and update 'minor' dependency releases. To set your own defaults, add a [`sonar.config.js`](.sonarrc.example.js)
+Sonar give you the ability to fine-tune these workflows for local development and CI. By default, zero config needed and out of the box, Sonar will 'patch' and update 'minor' dependency releases. To set your own defaults, add a [`sonar.config.js`](sonar.config.example.js)
 
 ## Workspace Synchronisation
 
@@ -73,7 +73,7 @@ _note: you do not need the --fix command as 'bump' will always update the packag
 
 > `sonar update [options]`
 
-To get the most out of Sonar, we recommend you separate `major` update form `patch` and `minor`. This is so that updates are as smooth as possible, and you can take time over any required 'major' updates. For this you should set the following within the `.sonarrc.js`
+To get the most out of Sonar, we recommend you separate `major` update form `patch` and `minor`. This is so that updates are as smooth as possible, and you can take time over any required 'major' updates. For this you should set the following within the `sonar.config.js`
 
 ```js
 // .sonarerc.js
@@ -148,7 +148,6 @@ sonar update --pattern=eslint
 # or
 sonar update eslint
 ```
-
 
 ### groups
 
@@ -251,7 +250,7 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 
 **Config**
 
-[.sonarrc.js example](.sonarrc.example.js)
+[sonar.config.js example](sonar.config.example.js)
 
 **Output**
 
