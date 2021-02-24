@@ -107,7 +107,7 @@ const validateUsage = async ({ files, argv }) => {
     });
     const resultsArr = await Promise.all(resultPromises);
     const hasErrors = resultsArr.filter((isValid) => !isValid);
-    return { hasErrors };
+    return { hasErrors: hasErrors.length };
 };
 
 module.exports = validateUsage;
