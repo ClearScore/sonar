@@ -10,7 +10,7 @@ const ProgressBar = require('progress');
 const getFiles = require('./lib/get-package-jsons');
 const updateVersions = require('./lib/set-dependency-versions');
 const { getLatestFactory } = require('./lib/get-latest');
-const { log, error } = require('./lib/log');
+const { log, error, success } = require('./lib/log');
 const { errorFactory } = require('./lib/has-errors');
 const { MAJOR, MINOR, PATCH, PREMAJOR, PREPATCH, PREMINOR, PRERELEASE } = require('./lib/consts');
 
@@ -217,7 +217,6 @@ exports.handler = async function handler(argv) {
         .reduce((prev, { name, version }) => ({ ...prev, [name]: { name, version } }), {});
 
     const depsToUpdate = Object.keys(versionedPackages).length;
-    log(`Found ${depsToUpdate} dependencies to update`);
 
     if (argv.fix) {
         let fileChanges = 0;
@@ -231,7 +230,11 @@ exports.handler = async function handler(argv) {
         };
         await pMap(files, depsMapper, { concurrency: argv.concurrency });
 
-        log(`Updated ${depsToUpdate} dependencies within ${fileChanges} files`);
+        success(`Updated ${depsToUpdate} dependencies within ${fileChanges} files`);
+    } else if (depsToUpdate === 0) {
+        success(`Found nothing to update`);
+    } else {
+        error(`Found ${depsToUpdate} dependencies to update`);
     }
 
     const hasErrors = logErrors();

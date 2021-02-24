@@ -29,7 +29,8 @@ sonar [cmd] [options] [--fix] [--fail]
   - [groups](#groups): `sonar update --group=my-group`
 
 - [Validation](#validation)
-  - [default](#validate-default): `sonar validate`
+  - [versions](#versions): `sonar validate --versions`
+  - [usage](#usage): `sonar validate --usage`
 
 Sonar give you the ability to fine-tune these workflows for local development and CI. By default, zero config needed and out of the box, Sonar will 'patch' and update 'minor' dependency releases. To set your own defaults, add a [`sonar.config.js`](sonar.config.example.js)
 
@@ -176,7 +177,7 @@ sonar update --group=test
 
 > `sonar validate [options]`
 
-### Validate default
+### versions
 
 > Validate that all dependency versions are in the same version.
 
@@ -185,7 +186,15 @@ Having multiple versions of the same dependency can cause a lot of trouble withi
 using the `--fix` option here will allow you to pick which version to use
 
 ```sh
-sonar validate
+sonar validate --versions
+```
+
+### usage
+
+> Ensure that each package within the mono repo has every dependency within the package.json
+
+```sh
+sonar validate --usage
 ```
 
 ## CLI options
@@ -214,7 +223,8 @@ Commands:
     --group                         [default: ""]    Only target dependencies matching the aliased pattern
 
 # validation
-  sonar validate                                     Ensure all dependencies are on the same version
+  sonar validate --versions                          Ensure all dependencies are on the same version
+  sonar validate --usage                             Ensure all required dependencies exist in the package.json
 
 More Options:
   --fix                          [default: false]    Fix any errors and update any relevant package.json files

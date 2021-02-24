@@ -6,11 +6,11 @@ module.exports = {
     devDeps: true,
     peerDeps: true,
     ignoreScopes: ['@not-published'],
-    internalScopes: ['@clearscore', '@clearscore-tools', '@clearscore-verticals'],
+    internalScopes: ['@clearscore'],
     groups: {
         lint: '^eslint(.*)?',
     },
-    usageIgnorePackages: ['jest-junit'],
+    usageIgnorePackages: ['jest-junit', '@commitlint/config-conventional'],
     usageIgnorePattern: [
         'dist',
         '__mock__/*',
