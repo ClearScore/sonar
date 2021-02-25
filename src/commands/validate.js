@@ -5,6 +5,7 @@ const chalk = require('chalk');
 
 const getFiles = require('./lib/get-package-jsons');
 const { log } = require('./lib/log');
+const listify = require('./lib/listify');
 const validateVersions = require('./validate/versions');
 const validateUnused = require('./validate/unused');
 
@@ -26,7 +27,7 @@ exports.builder = function handler(yargs) {
             default: false,
         })
         .example('$0 validate --versions --fix')
-        .example('$0 validate --usage --fix')
+        .example('$0 validate --unused --fix')
         .middleware((argv) => {
             const newArgs = { ...argv };
 
@@ -42,6 +43,8 @@ exports.builder = function handler(yargs) {
 exports.handler = async function handler(argv) {
     log(`|`);
     log(`|   ${chalk.bold('Will fix?:')} ${argv.fix}`);
+    log(`|   ${chalk.bold('Will fail?:')} ${argv.fail}`);
+    log(`|   ${chalk.bold('Tasks:')} ${listify([argv.versions, argv.unused])}`);
     log(`|\n`);
     const files = await getFiles(argv);
     log(`Found ${files.length} workspace package.json files`);

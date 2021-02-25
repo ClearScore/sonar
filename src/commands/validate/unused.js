@@ -31,7 +31,7 @@ const depsCheckDefaults = {
 
 const validateUnused = async ({ files, argv }) => {
     const errors = [];
-    const depsCheckOptions = deepMerge(depsCheckDefaults, argv.depCheckConfig);
+    const depsCheckOptions = deepMerge(depsCheckDefaults, argv.depCheckConfig || {});
     const uniqueDeps = files.reduce((prev, { file }) => {
         const newDeps = {
             ...prev,
@@ -102,6 +102,8 @@ const validateUnused = async ({ files, argv }) => {
         errors.forEach((err) => {
             if (err.unused) {
                 error(`Found unused ${err.type} in ${err.packageName}`);
+                // eslint-disable-next-line no-console
+                console.log(`${JSON.stringify(err.unused, null, 2)}\n`);
             }
             if (err.missing) {
                 error(`Found missing dependency in ${err.packageName}`);
@@ -113,6 +115,8 @@ const validateUnused = async ({ files, argv }) => {
         errors.forEach((err) => {
             if (err.unused) {
                 warning(`Found unused ${err.type} in ${err.packageName}`);
+                // eslint-disable-next-line no-console
+                console.log(`${JSON.stringify(err.unused, null, 2)}\n`);
             }
             if (err.missing) {
                 warning(`Found missing dependency in ${err.packageName}`);

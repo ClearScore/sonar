@@ -10,17 +10,19 @@ module.exports = {
     groups: {
         lint: '^eslint(.*)?',
     },
-    usageIgnorePackages: ['jest-junit'],
-    usageIgnorePattern: [
-        'dist',
-        '__mock__/*',
-        'mock/*',
-        '*.test.js',
-        '*.spec.js',
-        '*.stories.js',
-        'tests',
-        'test-resources',
-        'cypress',
-        'storybook',
-    ],
+    depCheckConfig: {
+        ignoreMatches: ['jest-junit', '@commitlint/config-conventional'],
+        ignorePatterns: [
+            'dist',
+            '__mock__/*',
+            'mock/*',
+            '*.test.js',
+            '*.spec.js',
+            '*.stories.js',
+            'tests',
+            'test-resources',
+            'cypress',
+            'storybook',
+        ],
+    },
 };

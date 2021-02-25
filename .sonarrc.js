@@ -12,7 +12,7 @@ module.exports = {
     },
     depCheckConfig: {
         ignoreMatches: ['jest-junit', '@commitlint/config-conventional'],
-        ignorePattern: [
+        ignorePatterns: [
             'dist',
             '__mock__/*',
             'mock/*',
