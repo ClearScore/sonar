@@ -86,47 +86,49 @@ const validateUnused = async ({ files, argv }) => {
 
     const resultsArr = await Promise.all(resultPromises);
     const hasErrors = resultsArr.filter((isValid) => !isValid);
-    if (argv.fix && errors.length) {
-        const promises = errors.map(async (err) => {
-            if (err.unused) {
+    const fixes = { unused: 0, missing: 0 };
+    const promises = errors.map(async (err) => {
+        if (err.unused) {
+            fixes.unused += err.unused.length;
+            if (argv.fix) {
                 log(`fixing unused ${err.type} in ${err.packageName}...`);
                 await fixUnusedDeps(err.filePath, err.type, err.unused);
+            } else if (argv.fail) {
+                error(`Found unused ${err.type} in ${err.packageName}`);
+            } else {
+                warning(`Found unused ${err.type} in ${err.packageName}`);
             }
-            if (err.missing) {
+            warning(`\n${JSON.stringify(err.unused, null, 2)}\n`);
+        }
+        if (err.missing) {
+            fixes.missing += Object.keys(err.missing).length;
+            if (argv.fix) {
                 log(`fixing missing dependency in ${err.packageName}...`);
                 await fixMissingDeps(err.filePath, err.missing);
-            }
-        });
-        await Promise.all(promises);
-    } else if (errors.length && argv.fail) {
-        errors.forEach((err) => {
-            if (err.unused) {
-                error(`Found unused ${err.type} in ${err.packageName}`);
-                // eslint-disable-next-line no-console
-                console.log(`${JSON.stringify(err.unused, null, 2)}\n`);
-            }
-            if (err.missing) {
+            } else if (argv.fail) {
                 error(`Found missing dependency in ${err.packageName}`);
-                // eslint-disable-next-line no-console
-                console.log(`${JSON.stringify(err.missing, null, 2)}\n`);
-            }
-        });
-    } else if (errors.length) {
-        errors.forEach((err) => {
-            if (err.unused) {
-                warning(`Found unused ${err.type} in ${err.packageName}`);
-                // eslint-disable-next-line no-console
-                console.log(`${JSON.stringify(err.unused, null, 2)}\n`);
-            }
-            if (err.missing) {
+            } else {
                 warning(`Found missing dependency in ${err.packageName}`);
-                // eslint-disable-next-line no-console
-                console.log(`${JSON.stringify(err.missing, null, 2)}\n`);
             }
-        });
+            warning(`\n${JSON.stringify(err.missing, null, 2)}\n`);
+        }
+    });
+
+    await Promise.all(promises);
+    if (argv.fix) {
+        if (errors.length) {
+            success(`Fixed ${fixes.unused} unused dependencies`);
+            success(`Fixed ${fixes.missing} missing dependencies`);
+        } else {
+            success(`Found no unused dependencies`);
+            success(`Found no missing dependencies`);
+        }
+    } else if (argv.fail) {
+        error(`Found ${fixes.unused} unused dependencies`);
+        error(`Found ${fixes.missing} missing dependencies`);
     } else {
-        success(`Found no unused dependencies`);
-        success(`Found no missing dependencies`);
+        warning(`Found ${fixes.unused} unused dependencies`);
+        warning(`Found ${fixes.missing} missing dependencies`);
     }
 
     return { hasErrors: hasErrors.length };
