@@ -115,20 +115,15 @@ const validateUnused = async ({ files, argv }) => {
     });
 
     await Promise.all(promises);
-    if (argv.fix) {
-        if (errors.length) {
-            success(`Fixed ${fixes.unused} unused dependencies`);
-            success(`Fixed ${fixes.missing} missing dependencies`);
-        } else {
-            success(`Found no unused dependencies`);
-            success(`Found no missing dependencies`);
-        }
-    } else if (argv.fail) {
-        error(`Found ${fixes.unused} unused dependencies`);
-        error(`Found ${fixes.missing} missing dependencies`);
+    if (argv.fix && errors.length) {
+        success(`Fixed ${fixes.unused} unused dependencies`);
+        success(`Fixed ${fixes.missing} missing dependencies`);
     } else {
-        warning(`Found ${fixes.unused} unused dependencies`);
-        warning(`Found ${fixes.missing} missing dependencies`);
+        const logFail = argv.fail ? error : success;
+        if (fixes.unused === 0) success(`Found 0 unused dependencies`);
+        if (fixes.missing === 0) success(`Found 0 missing dependencies`);
+        if (fixes.unused > 0) logFail(`Found ${fixes.unused} unused dependencies`);
+        if (fixes.missing > 0) logFail(`Found ${fixes.missing} missing dependencies`);
     }
 
     return { hasErrors: hasErrors.length };
