@@ -119,7 +119,7 @@ const validateUnused = async ({ files, argv }) => {
         success(`Fixed ${fixes.unused} unused dependencies`);
         success(`Fixed ${fixes.missing} missing dependencies`);
     } else {
-        const logFail = argv.fail ? error : success;
+        const logFail = argv.fail ? error : warning;
         if (fixes.unused === 0) success(`Found 0 unused dependencies`);
         if (fixes.missing === 0) success(`Found 0 missing dependencies`);
         if (fixes.unused > 0) logFail(`Found ${fixes.unused} unused dependencies`);
