@@ -1,9 +1,9 @@
 const path = require('path');
 const semver = require('semver');
 const depcheck = require('depcheck');
-const chalk = require('chalk');
+const deepMerge = require('deepmerge');
 
-const { log, error } = require('../lib/log');
+const { log, error, warning, success } = require('../lib/log');
 const { getLatestFactory } = require('../lib/get-latest');
 const { fixMissingDeps, fixUnusedDeps } = require('../lib/fix-usage');
 
@@ -29,12 +29,9 @@ const depsCheckDefaults = {
     ],
 };
 
-const validateUsage = async ({ files, argv }) => {
-    const depsCheckOptions = {
-        ...depsCheckDefaults,
-        ignoreMatches: argv.usageIgnorePackages || [],
-        ignorePatterns: argv.usageIgnorePattern || [],
-    };
+const validateUnused = async ({ files, argv }) => {
+    const errors = [];
+    const depsCheckOptions = deepMerge(depsCheckDefaults, argv.depCheckConfig);
     const uniqueDeps = files.reduce((prev, { file }) => {
         const newDeps = {
             ...prev,
@@ -76,38 +73,59 @@ const validateUsage = async ({ files, argv }) => {
         }
 
         if (unused.dependencies.length) {
-            log(`Unused dependencies in ${packageName}`);
-            log(unused.dependencies);
-
-            if (argv.fix) {
-                log(`fixing unused dev deps in ${packageName}...`);
-                await fixUnusedDeps(filePath, 'dependencies', unused.dependencies);
-            }
+            errors.push({ packageName, unused: unused.dependencies, filePath, type: 'dependencies' });
         }
         if (unused.devDependencies.length) {
-            log(`Unused devDependencies in ${packageName}`);
-            log(unused.devDependencies);
-
-            if (argv.fix) {
-                log(`fixing unused dev deps in ${filePath}...`);
-                await fixUnusedDeps(filePath, 'devDependencies', unused.devDependencies);
-            }
+            errors.push({ packageName, unused: unused.devDependencies, filePath, type: 'devDependencies' });
         }
         if (Object.keys(missing).length) {
-            log(`missing dependencies in ${packageName}`);
-            log(chalk.green(`${JSON.stringify(missing, null, 2)}\n`));
-
-            if (argv.fix) {
-                log(`fixing missing in ${filePath}...`);
-                await fixMissingDeps(filePath, missing);
-            }
+            errors.push({ packageName, missing, filePath });
         }
-
         return isValid;
     });
+
     const resultsArr = await Promise.all(resultPromises);
     const hasErrors = resultsArr.filter((isValid) => !isValid);
+    if (argv.fix && errors.length) {
+        const promises = errors.map(async (err) => {
+            if (err.unused) {
+                log(`fixing unused ${err.type} in ${err.packageName}...`);
+                await fixUnusedDeps(err.filePath, err.type, err.unused);
+            }
+            if (err.missing) {
+                log(`fixing missing dependency in ${err.packageName}...`);
+                await fixMissingDeps(err.filePath, err.missing);
+            }
+        });
+        await Promise.all(promises);
+    } else if (errors.length && argv.fail) {
+        errors.forEach((err) => {
+            if (err.unused) {
+                error(`Found unused ${err.type} in ${err.packageName}`);
+            }
+            if (err.missing) {
+                error(`Found missing dependency in ${err.packageName}`);
+                // eslint-disable-next-line no-console
+                console.log(`${JSON.stringify(err.missing, null, 2)}\n`);
+            }
+        });
+    } else if (errors.length) {
+        errors.forEach((err) => {
+            if (err.unused) {
+                warning(`Found unused ${err.type} in ${err.packageName}`);
+            }
+            if (err.missing) {
+                warning(`Found missing dependency in ${err.packageName}`);
+                // eslint-disable-next-line no-console
+                console.log(`${JSON.stringify(err.missing, null, 2)}\n`);
+            }
+        });
+    } else {
+        success(`Found no unused dependencies`);
+        success(`Found no missing dependencies`);
+    }
+
     return { hasErrors: hasErrors.length };
 };
 
-module.exports = validateUsage;
+module.exports = validateUnused;

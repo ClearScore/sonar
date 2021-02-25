@@ -3,7 +3,7 @@ const pMap = require('p-map');
 const ProgressBar = require('progress');
 const inquirer = require('inquirer');
 
-const { log, error, success } = require('../lib/log');
+const { log, error, success, warning } = require('../lib/log');
 
 const setNewContent = ({ dep, version, file }) => {
     const newContent = {
@@ -107,9 +107,11 @@ const validateVersions = async ({ files, argv }) => {
         await Promise.all(promises);
         success(`Updated ${localChanges} versions`);
     } else if (localChanges === 0) {
-        success(`Found nothing to update`);
-    } else {
+        success(`Found ${localChanges} versions to update`);
+    } else if (argv.fail) {
         error(`Found ${localChanges} versions to update`);
+    } else {
+        warning(`Found ${localChanges} versions to update`);
     }
 
     return { hasErrors };

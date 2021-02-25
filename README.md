@@ -30,7 +30,7 @@ sonar [cmd] [options] [--fix] [--fail]
 
 - [Validation](#validation)
   - [versions](#versions): `sonar validate --versions`
-  - [usage](#usage): `sonar validate --usage`
+  - [unused](#unused): `sonar validate --unused`
 
 Sonar give you the ability to fine-tune these workflows for local development and CI. By default, zero config needed and out of the box, Sonar will 'patch' and update 'minor' dependency releases. To set your own defaults, add a [`sonar.config.js`](sonar.config.example.js)
 
@@ -189,13 +189,41 @@ using the `--fix` option here will allow you to pick which version to use
 sonar validate --versions
 ```
 
-### usage
+### unused
 
 > Ensure that each package within the mono repo has every dependency within the package.json
 
-```sh
-sonar validate --usage
+We use [DepCheck](https://github.com/depcheck/depcheck) to do the heavy lifting here, and we add on the ability to auto-fix the results.
+
+To pass in options to DepCheck, add a `depCheckConfig` option into the config file. This will be 'deep-merged' without our defaults.
+
+```js
+// sonar.config.js
+module.exports = {
+  depCheckConfig: {
+    ignoreMatches: ['jest-junit', '@commitlint/config-conventional'],
+    ignorePattern: [
+      'dist',
+      '__mock__/*',
+      '*.test.js',
+      '*.spec.js',
+      '*.stories.js',
+      'tests',
+      'test-resources',
+      'cypress',
+      'storybook',
+    ],
+  },
+};
 ```
+
+```sh
+sonar validate --unused
+# or
+sonar validate --depCheck
+```
+
+We recommend you _never_ include 'devDependencies' into the workspace package unless it affects the consumable code (like a build tool). For this reason, we should exclude _all_ test and mock files from our checks.
 
 ## CLI options
 
@@ -224,7 +252,7 @@ Commands:
 
 # validation
   sonar validate --versions                          Ensure all dependencies are on the same version
-  sonar validate --usage                             Ensure all required dependencies exist in the package.json
+  sonar validate --unused                             Ensure all required dependencies exist in the package.json
 
 More Options:
   --fix                          [default: false]    Fix any errors and update any relevant package.json files
@@ -239,7 +267,7 @@ More Options:
 #  sonar update --external --major babel     Update only external dependencies with a name containing babel
 #  sonar update --canary feat-update         Update all dependencies with a release containing feat-update
 #  sonar sync --remote                       Update workspace package versions and ensure all usages are up-to-dae
-#  sonar validate                            Validate each usage of all dependencies are the same
+#  sonar validate                            Validate each unused of all dependencies are the same
 
 ```
 

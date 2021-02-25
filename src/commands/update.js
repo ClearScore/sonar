@@ -10,8 +10,9 @@ const ProgressBar = require('progress');
 const getFiles = require('./lib/get-package-jsons');
 const updateVersions = require('./lib/set-dependency-versions');
 const { getLatestFactory } = require('./lib/get-latest');
-const { log, error, success } = require('./lib/log');
+const { log, error, success, warning } = require('./lib/log');
 const { errorFactory } = require('./lib/has-errors');
+const listify = require('./lib/listify');
 const { MAJOR, MINOR, PATCH, PREMAJOR, PREPATCH, PREMINOR, PRERELEASE } = require('./lib/consts');
 
 const getLatest = getLatestFactory();
@@ -133,10 +134,11 @@ exports.handler = async function handler(argv) {
         .join(', ');
     log(`|`);
     log(`|   ${chalk.bold('Will fix?:')} ${argv.fix}`);
-    log(`|   ${chalk.bold('SemVer:')} ${semVer}`);
+    log(`|   ${chalk.bold('Will fail?:')} ${argv.fail}`);
+    log(`|   ${chalk.bold('SemVer Filter:')} ${semVer}`);
     log(`|   ${chalk.bold('Types:')} ${types}`);
     log(`|   ${chalk.bold('Groups:')} ${groups}`);
-    log(`|   ${chalk.bold('Pattern:')} ${argv.pattern}`);
+    log(`|   ${chalk.bold('Pattern:')} ${argv.pattern || 'none'}`);
     log(`|\n`);
     const files = await getFiles(argv);
     log(`Found ${files.length} workspace package.json files`);
@@ -217,6 +219,8 @@ exports.handler = async function handler(argv) {
         .reduce((prev, { name, version }) => ({ ...prev, [name]: { name, version } }), {});
 
     const depsToUpdate = Object.keys(versionedPackages).length;
+    const inFilter = [argv.major && 'major', argv.minor && 'minor', argv.patch && 'patch'].filter(Boolean);
+    const hasErrors = logErrors();
 
     if (argv.fix) {
         let fileChanges = 0;
@@ -233,11 +237,12 @@ exports.handler = async function handler(argv) {
         success(`Updated ${depsToUpdate} dependencies within ${fileChanges} files`);
     } else if (depsToUpdate === 0) {
         success(`Found nothing to update`);
+    } else if (argv.fail) {
+        error(`Found ${depsToUpdate} ${listify(inFilter)} dependency updates`);
     } else {
-        error(`Found ${depsToUpdate} dependencies to update`);
+        warning(`Found ${depsToUpdate} ${listify(inFilter)} dependency updates`);
     }
 
-    const hasErrors = logErrors();
     if (argv.fail && hasErrors) {
         process.exit(1);
     }

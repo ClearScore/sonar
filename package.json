@@ -49,6 +49,7 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "4.1.0",
+    "deepmerge": "4.2.2",
     "depcheck": "1.4.0",
     "filehound": "1.17.4",
     "find-up": "5.0.0",
