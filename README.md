@@ -293,3 +293,13 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 **Output**
 
 ![image](./assets/update.png)
+
+# todo
+  - ALL: add `--interactive` (`-i`) option. keep changes in memory and ask `fix` each change?
+  - update:
+    - update patch/minor version even if there is a major available
+  - validate:
+    - unused: resolve / ignore workspace packages
+    - unused: mark files as 'dev' and put those deps in root package.json
+    - versions: validate peerdeps are met
+    - deprecations: build it!

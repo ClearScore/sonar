@@ -3,7 +3,7 @@
 
 const chalk = require('chalk');
 
-const getFiles = require('./lib/get-package-jsons');
+const getWorkspace = require('../workspace');
 const { log } = require('./lib/log');
 const listify = require('./lib/listify');
 const validateVersions = require('./validate/versions');
@@ -41,23 +41,31 @@ exports.builder = function handler(yargs) {
 };
 
 exports.handler = async function handler(argv) {
-    log(`|`);
-    log(`|   ${chalk.bold('Will fix?:')} ${argv.fix}`);
-    log(`|   ${chalk.bold('Will fail?:')} ${argv.fail}`);
-    log(`|   ${chalk.bold('Tasks:')} ${listify([argv.versions && 'versions', argv.unused && 'unused'])}`);
-    log(`|\n`);
-    const files = await getFiles(argv);
-    log(`Found ${files.length} workspace package.json files`);
+    const workspace = await getWorkspace({ folder: argv.folder });
+
+    log(`------------`);
+    log(``);
+    log(`${chalk.bold('Will fix?:')} ${argv.fix}`);
+    log(`${chalk.bold('Will fail?:')} ${argv.fail}`);
+    log(`${chalk.bold('Tasks:')} ${listify([argv.versions && 'versions', argv.unused && 'unused'])}`);
+    log(``);
+    log(`------------`);
+    log(``);
+    log(`Found ${workspace.getPackageCount()} workspace package.json files`);
+    log(`Found ${workspace.getDependencyCount()} unique dependencies`);
+    log(``);
+    log(`------------`);
+
     let versionErrors = false;
     let depCheckErrors = false;
 
     if (argv.versions) {
-        const { hasErrors } = await validateVersions({ files, argv });
+        const { hasErrors } = await validateVersions({ workspace, argv });
         versionErrors = hasErrors;
     }
 
     if (argv.unused) {
-        const { hasErrors } = await validateUnused({ files, argv });
+        const { hasErrors } = await validateUnused({ workspace, argv });
         depCheckErrors = hasErrors;
     }
 

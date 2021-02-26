@@ -2,20 +2,13 @@
 // https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
 
 const chalk = require('chalk');
-const jsonfile = require('jsonfile');
-const pMap = require('p-map');
-const semver = require('semver');
 const ProgressBar = require('progress');
 
-const getFiles = require('./lib/get-package-jsons');
-const updateVersions = require('./lib/set-dependency-versions');
-const { getLatestFactory } = require('./lib/get-latest');
-const { log, error, success, warning } = require('./lib/log');
+const getWorkspace = require('../workspace');
+const { log, error, success, warning, branding } = require('./lib/log');
 const { errorFactory } = require('./lib/has-errors');
 const listify = require('./lib/listify');
 const { MAJOR, MINOR, PATCH, PREMAJOR, PREPATCH, PREMINOR, PRERELEASE } = require('./lib/consts');
-
-const getLatest = getLatestFactory();
 
 exports.command = 'update';
 
@@ -117,7 +110,21 @@ exports.builder = function handler(yargs) {
         });
 };
 
+const matchesPattern = (dependency, { options, patternRegEx, groupRegEx }) => {
+    const { name, scope } = dependency;
+    const internalMatch = options.internalScopes.includes(scope);
+    const ignoredMatch = options.ignoreScopes.includes(scope);
+    const externalMatch = !options.internalScopes.includes(scope) && !ignoredMatch;
+    const isValidInternal = (options.internal && internalMatch) || !options.internal;
+    const isValidExternal = (options.external && externalMatch) || !options.external;
+    const isValidPattern = (patternRegEx && patternRegEx.test(name)) || !patternRegEx;
+    const isValidGroup = (groupRegEx && groupRegEx.test(name)) || !groupRegEx;
+    const check = isValidInternal && isValidExternal && isValidPattern && isValidGroup;
+    return check;
+};
+
 exports.handler = async function handler(argv) {
+    const workspace = await getWorkspace({ folder: argv.folder });
     const { saveError, logErrors } = errorFactory(argv);
     const semVer = [argv.patch && 'patch', argv.minor && 'minor', argv.major && 'major'].filter(Boolean).join(', ');
     const types = [argv.deps && 'dependencies', argv.dev && 'devDependencies', argv.peer && 'peerDependencies']
@@ -132,6 +139,19 @@ exports.handler = async function handler(argv) {
     ]
         .filter(Boolean)
         .join(', ');
+
+    // filter out deps based on args
+    const patternMatcher = argv.pattern || '';
+    const groupMatcher = (argv.groups && argv.groups[argv.group]) || '';
+    const patternRegEx = patternMatcher && new RegExp(patternMatcher, 'i');
+    const groupRegEx = groupMatcher && new RegExp(groupMatcher, 'i');
+    const filteredDeps = workspace
+        .getDependencies()
+        .filter((dependency) => matchesPattern(dependency, { patternRegEx, groupRegEx, options: argv }))
+        .sort();
+    const filteredDepCount = filteredDeps.length;
+
+    log(`|   ------------`);
     log(`|`);
     log(`|   ${chalk.bold('Will fix?:')} ${argv.fix}`);
     log(`|   ${chalk.bold('Will fail?:')} ${argv.fail}`);
@@ -139,108 +159,83 @@ exports.handler = async function handler(argv) {
     log(`|   ${chalk.bold('Types:')} ${types}`);
     log(`|   ${chalk.bold('Groups:')} ${groups}`);
     log(`|   ${chalk.bold('Pattern:')} ${argv.pattern || 'none'}`);
-    log(`|\n`);
-    const files = await getFiles(argv);
-    log(`Found ${files.length} workspace package.json files`);
+    log(`|`);
+    log(`|   ------------`);
+    log(`|`);
+    log(`|   Found ${workspace.getPackageCount()} workspace package.json files`);
+    log(`|   Found ${workspace.getDependencyCount()} unique dependencies`);
+    if (argv.pattern || argv.group) {
+        log(`|   Found ${filteredDepCount} dependencies (within groups + pattern)`);
+    }
+    log(`|   `);
+    log(`|   ------------\n`);
+    log(``);
 
-    const localPackages = {};
-    const uniqueDeps = files.reduce((prev, { file }) => {
-        localPackages[file.name] = file.version;
-        const newDeps = {
-            ...prev,
-            ...(argv.dependencies ? file.dependencies : {}),
-            ...(argv.devDependencies ? file.devDependencies : {}),
-            ...(argv.peerDependencies ? file.peerDependencies : {}),
-        };
-        Object.keys(newDeps).forEach((dep) => {
-            if (prev[dep] && semver.lt(semver.minVersion(prev[dep]), semver.minVersion(newDeps[dep]))) {
-                newDeps[dep] = prev[dep];
-            }
-        });
-        return newDeps;
-    }, {});
-    const uniqueDepCount = Object.keys(uniqueDeps).length;
-    log(`Found ${uniqueDepCount} unique dependencies\n`);
+    const depsBar = new ProgressBar(`${branding} Checking dependency versions (:total) [:bar] :percent`, {
+        total: filteredDepCount,
+    });
 
-    const depsBar = new ProgressBar('Checking dependency versions (:total) [:bar] :percent', { total: uniqueDepCount });
-    const patternMatcher = argv.pattern || '';
-    const groupMatcher = (argv.groups && argv.groups[argv.group]) || '';
-    const patternRegEx = new RegExp(patternMatcher, 'i');
-    const groupRegEx = new RegExp(groupMatcher, 'i');
+    await Promise.all(
+        filteredDeps.map(async (dependency) => {
+            const { semVerChange, latestVersion } = await dependency.getLatest({ canary: argv.canary });
 
-    const versionedPackagesArr = await Promise.all(
-        Object.keys(uniqueDeps)
-            .sort()
-            .map(async (dep) => {
-                depsBar.tick(1);
-                const depScope = dep.split('/')[0];
-                const internalMatch = argv.internalScopes.includes(depScope);
-                const ignoredMatch = argv.ignoreScopes.includes(depScope);
-                const externalMatch = !argv.internalScopes.includes(depScope) && !ignoredMatch;
-                const isValidInternal = (argv.internal && internalMatch) || !argv.internal;
-                const isValidExternal = (argv.external && externalMatch) || !argv.external;
-                const isValidPattern = (patternMatcher && patternRegEx.test(dep)) || !patternMatcher;
-                const isValidGroup = (groupMatcher && groupRegEx.test(dep)) || !groupMatcher;
-                const fetchLatest = isValidInternal && isValidExternal && isValidPattern && isValidGroup;
-                if (!fetchLatest) return false;
+            depsBar.tick(); // tick after the getLatest call
 
-                const latestVersion = localPackages[dep] || (await getLatest(dep, argv));
-                if (!latestVersion && argv.canary) {
-                    return false;
+            // if there is a no new version, or change, exit stage left.
+            if (!latestVersion || !semVerChange) {
+                // you're trying to update to canary then exit without error
+                if (!argv.canary && !dependency.workspacePackage && !latestVersion) {
+                    error(`Could not find the latest version of ${dependency.name}, has it been published?`);
                 }
-                if (!latestVersion) {
-                    error(`Could not find the latest version of ${dep}, has it been published?`);
-                    return false;
-                }
-                const isSatisfied = latestVersion && semver.satisfies(latestVersion, uniqueDeps[dep]);
-                if (isSatisfied) return false;
-
-                const coercedVersion = semver.coerce(uniqueDeps[dep]);
-                const semVerChange = semver.diff(coercedVersion, latestVersion);
-                saveError({ semVerChange, dependency: dep, version: uniqueDeps[dep], newVersion: latestVersion });
-
-                if (
-                    (semVerChange === PRERELEASE && argv.patch) ||
-                    (semVerChange === MAJOR && argv.major) ||
-                    (semVerChange === MINOR && argv.minor) ||
-                    (semVerChange === PATCH && argv.patch) ||
-                    ([PREMINOR, PREPATCH, PREMAJOR].includes(semVerChange) && argv.canary)
-                ) {
-                    return { name: dep, version: latestVersion };
-                }
-
                 return false;
-            }, {}),
+            }
+
+            // save update log so we can inform user of other updates that weren't filtered out by semver restrictions
+            saveError({
+                semVerChange,
+                dependency: dependency.name,
+                version: dependency.minVersion,
+                newVersion: latestVersion,
+            });
+
+            // save the update if the changes fit within the given restrictions
+            if (
+                (semVerChange === PRERELEASE && argv.patch) ||
+                (semVerChange === MAJOR && argv.major) ||
+                (semVerChange === MINOR && argv.minor) ||
+                (semVerChange === PATCH && argv.patch) ||
+                ([PREMINOR, PREPATCH, PREMAJOR].includes(semVerChange) && argv.canary)
+            ) {
+                return dependency.updateVersion(latestVersion);
+            }
+            return false;
+        }, {}),
     );
     depsBar.terminate();
 
-    const versionedPackages = versionedPackagesArr
-        .filter(Boolean)
-        .reduce((prev, { name, version }) => ({ ...prev, [name]: { name, version } }), {});
+    // commit changes
+    let packagesWithChanges = 0;
+    let depsChanges = 0;
+    await workspace.getChanges({ commit: argv.fix }, (change) => {
+        if (change.type === 'package') packagesWithChanges += 1;
+        if (change.type === 'dependency') {
+            depsChanges += 1;
+            // no need to output 'package' changes separately
+            saveError(change);
+        }
+    });
 
-    const depsToUpdate = Object.keys(versionedPackages).length;
+    // Log results
     const inFilter = [argv.major && 'major', argv.minor && 'minor', argv.patch && 'patch'].filter(Boolean);
     const hasErrors = logErrors();
-
     if (argv.fix) {
-        let fileChanges = 0;
-        const depsMapper = async ({ file, path }) => {
-            const { change, newContent } = updateVersions(file, versionedPackages, argv);
-            if (!change) return;
-            fileChanges += 1;
-            if (newContent.version) {
-                await jsonfile.writeFile(path, newContent, { spaces: 2 });
-            }
-        };
-        await pMap(files, depsMapper, { concurrency: argv.concurrency });
-
-        success(`Updated ${depsToUpdate} dependencies within ${fileChanges} files`);
-    } else if (depsToUpdate === 0) {
+        success(`Updated ${depsChanges} dependencies within ${packagesWithChanges} files`);
+    } else if (packagesWithChanges === 0) {
         success(`Found nothing to update`);
     } else if (argv.fail) {
-        error(`Found ${depsToUpdate} ${listify(inFilter)} dependency updates`);
+        error(`Found ${depsChanges} ${listify(inFilter)} dependency updates`);
     } else {
-        warning(`Found ${depsToUpdate} ${listify(inFilter)} dependency updates`);
+        warning(`Found ${depsChanges} ${listify(inFilter)} dependency updates`);
     }
 
     if (argv.fail && hasErrors) {
