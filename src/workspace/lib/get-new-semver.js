@@ -28,14 +28,15 @@ const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
     return latestVersion;
 };
 
-const update = ({ version, latestVersion }) => {
+const getNewSemver = ({ version, latestVersion }) => {
     if (!version) return null;
     const depSatisfied = semver.satisfies(latestVersion, version);
     const coercedVersion = semver.coerce(version);
-    const semVerChange = semver.diff(coercedVersion, latestVersion);
+    const coercedLatestVersion = semver.coerce(latestVersion);
+    const semVerChange = semver.diff(coercedVersion, coercedLatestVersion);
     const newVersion = replaceWildCards({ version, latestVersion, semVerChange });
     // only return update is
     return !depSatisfied ? { newVersion, semVerChange } : null;
 };
 
-module.exports = { replaceWildCards, getWildCards, update };
+module.exports = { replaceWildCards, getWildCards, getNewSemver };

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const yargs = require('yargs');
 const fs = require('fs');
+// require('abab');
 const findUp = require('find-up');
 
 const configPathJson = findUp.sync(['.sonarrc', '.sonar.json']);
