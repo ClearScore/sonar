@@ -13,7 +13,7 @@ A workspace contains `Packages` and `Dependencies` which allows you to manipulat
 ```js
 const createWorkspace = require('./workspace');
 
-const workspace = await createWorkspace({ folder: '.', onEvent: () => {} });
+const workspace = await createWorkspace({ folder: '.' });
 ```
 
 ### 2. Make Changes
