@@ -22,6 +22,9 @@ const workspace = await createWorkspace({ folder: '.', onEvent: () => {} });
 const pkg = workspace.getPackage({ name: 'my-package' });
 pkg.updateVersion('2.0.0');
 pkg.addDependency({ name: 'ava', type: 'dependencies' });
+
+const dependency = workspace.getDependency({ name: 'my-dep' });
+dependency.updateVersion('1.0.0');
 ```
 
 ### 3. Commit Changes
