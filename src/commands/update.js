@@ -231,7 +231,7 @@ exports.handler = async function handler(argv) {
     if (argv.fix) {
         success(`Updated ${depsChanges} dependencies within ${packagesWithChanges} files`);
     } else if (packagesWithChanges === 0) {
-        success(`Found nothing to update`);
+        success(`Found no ${listify(inFilter)} dependency updates`);
     } else if (argv.fail) {
         error(`Found ${depsChanges} ${listify(inFilter)} dependency updates`);
     } else {
