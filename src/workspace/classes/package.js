@@ -107,6 +107,9 @@ class Package {
             dependency = this.workspace.registerDependency({ pkg: this, name, version, type });
         }
         this.isDirty = true;
+        if (!this.contents[type]) {
+            this.contents[type] = {};
+        }
         this.contents[type][dependency.name] = dependency.minVersion;
         this.contents[type] = Object.keys(this.contents[type])
             .sort()
@@ -114,7 +117,7 @@ class Package {
 
         if (!version || version === '0.0.0') {
             const [commonVersion] = dependency.getVersions();
-            if (commonVersion) {
+            if (commonVersion && commonVersion.version !== '0.0.0') {
                 dependency.updateVersion(commonVersion.version);
             } else {
                 const { latestVersion } = await dependency.getLatest();
