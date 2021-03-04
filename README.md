@@ -23,6 +23,8 @@ sonar [cmd] [options] [--fix] [--fail]
   - [default](#update-default): `sonar update`
   - [internal](#internal): `sonar update --internal`
   - [external](#external): `sonar update --external`
+  - [patch](#patch): `sonar update --patch`
+  - [minor](#minor): `sonar update --minor`
   - [major](#major): `sonar update --major`
   - [canary](#canary): `sonar update --canary=my-canary-10.0`
   - [pattern](#pattern): `sonar update --pattern=mdx`
@@ -74,20 +76,11 @@ _note: you do not need the --fix command as 'bump' will always update the packag
 
 > `sonar update [options]`
 
-To get the most out of Sonar, we recommend you separate `major` update form `patch` and `minor`. This is so that updates are as smooth as possible, and you can take time over any required 'major' updates. For this you should set the following within the `sonar.config.js`
-
-```js
-// .sonarerc.js
-module.exports = {
-  patch: true,
-  minor: true,
-  major: false,
-};
-```
+We recommend you update `--patch` and `--minor` releases separately from `--major` updates. This is so that updates are as smooth as possible, and you can take time over any required 'major' updates.
 
 ### Update default
 
-> By default, sonar will try to find updates for all dependencies
+> By default, sonar will try to find updates for all dependencies, in all sem-ver ranges and withing all groups.
 
 ```sh
 sonar update
@@ -118,16 +111,30 @@ sonar update --internal
 sonar update --external
 ```
 
+### patch
+
+> Find those external dependencies that have had 'patch' releases
+
+```sh
+sonar update --minor --fix
+```
+
+### minor
+
+> Find those external dependencies that have had 'minor' releases
+
+```sh
+sonar update --minor --fix
+```
+
 ### major
 
-> Find those external dependencies that have had major releases
-
-If you are using the recommended defaults (`patch: true, minor:true`) within the config file, you may want to turn these off when looking at major updates.
+> Find those external dependencies that have had 'major' releases
 
 Omitting the `--fix` flag is good start when researching what updates we should be thinking about making in the future.
 
 ```sh
-sonar update --external --no-patch --no-minor --major
+sonar update --external --major
 ```
 
 ### canary
@@ -295,11 +302,12 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 ![image](./assets/update.png)
 
 # todo
-  - ALL: add `--interactive` (`-i`) option. keep changes in memory and ask `fix` each change?
-  - update:
-    - update patch/minor version even if there is a major available
-  - validate:
-    - unused: resolve / ignore workspace packages
-    - unused: mark files as 'dev' and put those deps in root package.json
-    - versions: validate peerdeps are met
-    - deprecations: build it!
+
+- ALL: add `--interactive` (`-i`) option. keep changes in memory and ask `fix` each change?
+- update:
+  - update patch/minor version even if there is a major available
+- validate:
+  - unused: recognise 'nodeJs' globals
+  - versions: validate peerDeps are met
+  - versions: validate resolutions are met
+  - deprecations: build it!

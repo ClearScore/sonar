@@ -79,6 +79,10 @@ class Workspace {
     // PUBLIC API
 
     // GET WORKSPACE DATA
+    getRootPackage() {
+        return this.allPackages.find((pkg) => pkg.isRoot);
+    }
+
     getPackages() {
         return this.allPackages;
     }

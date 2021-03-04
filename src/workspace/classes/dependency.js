@@ -74,6 +74,8 @@ class Dependency {
     removeParent({ pkg, type }) {
         const version = pkg.contents[type][this.name];
         this.parentPackages = this.parentPackages.filter((parent) => parent.name !== pkg.name);
+        if (!this.parentPackagesByVersion[version]) return;
+
         this.parentPackagesByVersion[version] = this.parentPackagesByVersion[version].filter(
             (parent) => parent.name !== pkg.name,
         );
