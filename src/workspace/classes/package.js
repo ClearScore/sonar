@@ -7,6 +7,7 @@ const getLatest = getLatestFactory();
 class Package {
     constructor({ contents, path, workspace }) {
         this.workspace = workspace;
+        this.isRoot = path === 'package.json'; // todo: do better
         this.path = path;
         this.name = contents.name;
         this.version = contents.version;
@@ -125,6 +126,10 @@ class Package {
             }
         }
         return dependency;
+    }
+
+    getDependency({ name }) {
+        return this.dependenciesByName[name];
     }
 
     // allow deps to be removed after everything is registered

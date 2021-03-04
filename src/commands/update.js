@@ -29,12 +29,12 @@ exports.builder = function handler(yargs) {
         .option('patch', {
             type: 'boolean',
             description: 'Update those matching dependencies which have had new patches released',
-            default: true,
+            default: false,
         })
         .option('minor', {
             type: 'boolean',
             description: 'Update those matching dependencies which have had new minor releases',
-            default: true,
+            default: false,
         })
         .option('major', {
             type: 'boolean',
@@ -100,6 +100,13 @@ exports.builder = function handler(yargs) {
             if (argv.internal && argv.external) {
                 newArgs.internal = false;
                 newArgs.external = false;
+            }
+
+            // if no sem-ver range has been specified, assume to update them all
+            if (!argv.patch && !argv.minor && !argv.major) {
+                newArgs.patch = true;
+                newArgs.minor = true;
+                newArgs.major = true;
             }
 
             // use the final arg as a pattern
