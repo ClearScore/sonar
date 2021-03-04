@@ -204,7 +204,7 @@ const validateUnused = async ({ workspace, argv }) => {
                 if (isRoot && resultCache[pkgName].using.dev[update.name]) return;
                 unusedCount += 1;
                 log(update.name);
-                updatePromises.push(update.pkg.addDependency(update));
+                updatePromises.push(update.pkg.removeDependency(update));
             });
         }
     });

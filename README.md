@@ -308,6 +308,7 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
   - update patch/minor version even if there is a major available
 - validate:
   - unused: recognise 'nodeJs' globals
+  - unused: add option to ignore whole workspace package
   - versions: validate peerDeps are met
   - versions: validate resolutions are met
   - deprecations: build it!
