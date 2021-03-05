@@ -47,7 +47,7 @@ exports.handler = async function handler(argv) {
     log(``);
     log(`${chalk.bold('Will fix?:')} ${argv.fix}`);
     log(`${chalk.bold('Will fail?:')} ${argv.fail}`);
-    log(`${chalk.bold('Tasks:')} ${listify([argv.versions && 'versions', argv.unused && 'unused'])}`);
+    log(`${chalk.bold('Tasks:')} ${listify([argv.versions && 'versions', argv.unused && 'unused'].filter(Boolean))}`);
     log(``);
     log(`------------`);
     log(``);

@@ -202,24 +202,30 @@ sonar validate --versions
 
 We use [DepCheck](https://github.com/depcheck/depcheck) to do the heavy lifting here, and we add on the ability to auto-fix the results.
 
+To know the difference between 'devDependencies' and production 'dependencies' we need to use the `devPatterns` option.
+
 To pass in options to DepCheck, add a `depCheckConfig` option into the config file. This will be 'deep-merged' without our defaults.
+
+Some times packages have 'global' dependencies, so if you wish _not_ to check a package then use the `ignoreUnusedInPackages` option.
 
 ```js
 // sonar.config.js
 module.exports = {
+  ignoreUnusedInPackages: ['ignoreUnusedInPackages'],
+  devPatterns: [
+    '__mock__/*',
+    'mock/*',
+    '*.test.js',
+    '*.spec.js',
+    '*.stories.js',
+    'tests',
+    'test-resources',
+    'cypress',
+    'storybook',
+  ],
   depCheckConfig: {
     ignoreMatches: ['jest-junit', '@commitlint/config-conventional'],
-    ignorePattern: [
-      'dist',
-      '__mock__/*',
-      '*.test.js',
-      '*.spec.js',
-      '*.stories.js',
-      'tests',
-      'test-resources',
-      'cypress',
-      'storybook',
-    ],
+    ignorePattern: ['dist', 'build'],
   },
 };
 ```
@@ -231,6 +237,8 @@ sonar validate --depCheck
 ```
 
 We recommend you _never_ include 'devDependencies' into the workspace package unless it affects the consumable code (like a build tool). For this reason, we should exclude _all_ test and mock files from our checks.
+
+The `--fix` for this command will automatically move all dev-only dependencies to the root of the workspace.
 
 ## CLI options
 

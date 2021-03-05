@@ -1,9 +1,13 @@
 module.exports = {
+    // used in 'sonar update'
     ignoreScopes: ['@not-published'],
     internalScopes: ['@clearscore', '@clearscore-tools', '@clearscore-verticals'],
     groups: {
         lint: '^eslint(.*)?',
     },
+
+    // used in 'sonar validate --unused'
+    ignoreUnusedInPackages: ['@clearscore/dummy-package'],
     devPatterns: [
         '__mock__/*',
         'mock/*',

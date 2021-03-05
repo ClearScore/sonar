@@ -31,21 +31,28 @@ const getEmptyResultCache = () => ({
     using: { prod: {}, dev: {} },
 });
 
-const checkWorkspaceDeps = async ({ packageCount, packages, devPatterns = [], depCheckConfig }) => {
+const checkWorkspaceDeps = async ({
+    packageCount,
+    packages,
+    devPatterns = [],
+    depCheckConfig,
+    ignorePackages = [],
+}) => {
     const phase = devPatterns.length ? 1 : 2;
     const barTitle = `${branding} Phase ${phase}: ${phase === 1 ? 'production' : 'development'} [:bar] :percent`;
     const devBar = new ProgressBar(barTitle, { total: packageCount });
     const config = deepMerge({ ...depsCheckDefaults, ignorePatterns: devPatterns }, depCheckConfig);
-    const dependenciesList = await Promise.all(
-        packages.map(async (pkg) => {
-            const file = pkg.path === 'package.json' ? '.' : pkg.path.replace('/package.json', '');
-            const result = await new Promise((resolve) =>
-                depcheck(path.resolve(file), config, (unused) => resolve({ unused, pkg, isDev: devPatterns.length })),
-            );
-            devBar.tick();
-            return result;
-        }),
-    );
+    const promises = [];
+    packages.forEach((pkg) => {
+        if (ignorePackages.includes(pkg.name)) return;
+        const file = pkg.path === 'package.json' ? '.' : pkg.path.replace('/package.json', '');
+        const promise = new Promise((resolve) =>
+            depcheck(path.resolve(file), config, (unused) => resolve({ unused, pkg, isDev: devPatterns.length })),
+        );
+        devBar.tick();
+        promises.push(promise);
+    });
+    const dependenciesList = await Promise.all(promises);
     devBar.terminate();
     return dependenciesList;
 };
@@ -69,7 +76,7 @@ const checkWorkspaceDeps = async ({ packageCount, packages, devPatterns = [], de
 
 // # 'Unused dependencies': Removing dependencies from the packages
 // 1. if a prod dependency is 'unused' in a prod file, remove it from the package.json
-// 2. if a dev dependency is 'unused' anywhere, remove it from the _root_ package.json: <- todo
+// 2. if a dev dependency is 'unused' anywhere, remove it from the _root_ package.json
 
 const validateUnused = async ({ workspace, argv }) => {
     const packages = workspace.getPackages();
@@ -85,6 +92,7 @@ const validateUnused = async ({ workspace, argv }) => {
         packageCount,
         devPatterns: argv.devPatterns,
         depCheckConfig: argv.depCheckConfig,
+        ignorePackages: argv.ignoreUnusedInPackages,
     });
 
     // 2. create a 'base dependencies list'
@@ -92,6 +100,7 @@ const validateUnused = async ({ workspace, argv }) => {
         packages,
         packageCount,
         depCheckConfig: argv.depCheckConfig,
+        ignorePackages: argv.ignoreUnusedInPackages,
     });
 
     // 3. find missing + unused prod deps
@@ -150,6 +159,24 @@ const validateUnused = async ({ workspace, argv }) => {
             resultCache[pkg.name].unused.dev[depName] = { name: depName, type: 'dependencies', pkg };
         });
 
+        // since 'dev' files include most files, now check for mis-formed files
+        if (Object.keys(unused.invalidFiles).length) {
+            error(`Could not read file in ${pkg.getName()}`);
+            error(JSON.stringify(unused.invalidFiles, null, 2));
+        }
+    });
+
+    // step 5. now we have all the data, we can go through unused deps in prod, see if they are used in dev
+    //      e.g. a dev dep in the root project is unused in prod, we still want it in devDependencies, so dont remove it
+    baseDependenciesList.forEach(({ pkg }) => {
+        const unusedProdDeps = resultCache[pkg.name].unused.prod;
+        const usedDevDeps = resultCache[rootPackage.name].using.dev;
+        Object.keys(unusedProdDeps).forEach((depName) => {
+            if (usedDevDeps[depName] && unusedProdDeps[depName].type === 'devDependencies') {
+                delete resultCache[pkg.name].unused.prod[depName];
+            }
+        });
+
         // if it's unused in prod, but used in dev (and doesn't exist in the root package already),
         // then, mark it as a missing dev-dependency
         Object.keys(resultCache[pkg.name].unused.prod).forEach((depName) => {
@@ -165,12 +192,6 @@ const validateUnused = async ({ workspace, argv }) => {
                 };
             }
         });
-
-        // since 'dev' files include most files, now check for mis-formed files
-        if (Object.keys(unused.invalidFiles).length) {
-            error(`Could not read file in ${pkg.getName()}`);
-            error(JSON.stringify(unused.invalidFiles, null, 2));
-        }
     });
 
     // Update packages
@@ -179,7 +200,6 @@ const validateUnused = async ({ workspace, argv }) => {
     let missingCount = 0;
     let unusedCount = 0;
     Object.keys(resultCache).forEach((pkgName) => {
-        const isRoot = workspace.getRootPackage().name === pkgName;
         const missingProd = Object.values(resultCache[pkgName].missing.prod);
         const missingDev = Object.values(resultCache[pkgName].missing.dev);
         const unusedProd = Object.values(resultCache[pkgName].unused.prod);
@@ -200,11 +220,9 @@ const validateUnused = async ({ workspace, argv }) => {
         if (unused.length) {
             title(`Remove dependencies from ${pkgName}`);
             unused.forEach((update) => {
-                // if it's a dev dep (added from another package), don't remove it
-                if (isRoot && resultCache[pkgName].using.dev[update.name]) return;
-                unusedCount += 1;
                 log(update.name);
                 updatePromises.push(update.pkg.removeDependency(update));
+                unusedCount += 1;
             });
         }
     });
