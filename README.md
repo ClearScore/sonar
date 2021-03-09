@@ -232,8 +232,6 @@ module.exports = {
 
 ```sh
 sonar validate --unused
-# or
-sonar validate --depCheck
 ```
 
 We recommend you _never_ include 'devDependencies' into the workspace package unless it affects the consumable code (like a build tool). For this reason, we should exclude _all_ test and mock files from our checks.
@@ -241,8 +239,6 @@ We recommend you _never_ include 'devDependencies' into the workspace package un
 The `--fix` for this command will automatically move all dev-only dependencies to the root of the workspace.
 
 ## CLI options
-
-\_with any boolean option, the `no-` prefix is available to set it to false, in-case it is true by default, or has been set to true via the config file. e.g. `--no-patch` or `--no-peer`
 
 ```sh
 Commands:
@@ -255,8 +251,8 @@ Commands:
 # update
   sonar update --internal                            Update scopes flagged as internal
   sonar update --external                            Update scopes not flagged as internal
-    --patch                       [default: true]    Update to the latest patch semantic version
-    --minor                       [default: true]    Update to the latest minor semantic version
+    --patch                      [default: false]    Update to the latest patch semantic version
+    --minor                      [default: false]    Update to the latest minor semantic version
     --major                      [default: false]    Update to the latest major semantic version
     --deps, --dependencies        [default: true]    Update dependencies
     --dev, --devDependencies      [default: true]    Update devDependencies

@@ -87,7 +87,7 @@ exports.builder = function handler(yargs) {
             default: [],
         })
         .example(
-            '$0 update --no-patch --no-minor --major',
+            '$0 update --major',
             'Investigate which dependencies have had major releases, without being distracted by patch + minor releases',
         )
         .example('$0 update --major --fix "babel|postcss"', 'Update all your babel and postcss dependencies')

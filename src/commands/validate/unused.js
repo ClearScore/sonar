@@ -113,6 +113,7 @@ const validateUnused = async ({ workspace, argv }) => {
         missing.forEach((depName) => {
             // no need to add it to the root if it's a workspace package
             if (pkg.name === rootPackage.name && workspace.getPackage({ name: depName })) return;
+            // console.log(`0. adding prod dep ${depName} from ${pkg.name}`);
             resultCache[pkg.name].missing.prod[depName] = { name: depName, type: 'dependencies', pkg };
         });
         unused.devDependencies.forEach((depName) => {
@@ -144,6 +145,7 @@ const validateUnused = async ({ workspace, argv }) => {
 
         missing.forEach((depName) => {
             if (isProdDependency(depName, 'using')) return;
+            // console.log(`1. adding dev dep ${depName} from ${pkg.name}`);
             resultCache[rootPackage.name].missing.dev[depName] = {
                 name: depName,
                 type: 'devDependencies',
@@ -185,6 +187,7 @@ const validateUnused = async ({ workspace, argv }) => {
                 resultCache[pkg.name].using.dev[depName] &&
                 !rootPackage.getDependency({ name: depName })
             ) {
+                // console.log(`2. adding ${depName} from ${pkg.name}`);
                 resultCache[rootPackage.name].missing.dev[depName] = {
                     name: depName,
                     type: 'devDependencies',
