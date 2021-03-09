@@ -249,7 +249,7 @@ const validateUnused = async ({ workspace, argv }) => {
         unusedLogger(` - ${unusedCount} unused dependencies`);
     }
 
-    return { hasErrors: packagesWithChanges.length };
+    return { hasErrors: packagesWithChanges };
 };
 
 module.exports = validateUnused;
