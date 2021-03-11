@@ -35,7 +35,7 @@ const checkWorkspaceDeps = async ({
     packageCount,
     packages,
     devPatterns = [],
-    depCheckConfig,
+    depCheckConfig = {},
     ignorePackages = [],
 }) => {
     const phase = devPatterns.length ? 1 : 2;
