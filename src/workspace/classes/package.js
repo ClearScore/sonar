@@ -98,7 +98,7 @@ class Package {
     bump(bumpType) {
         if (!bumpType) return;
         const version = semver.inc(this.version, bumpType);
-        this.update(version);
+        this.updateVersion(version);
     }
 
     // allow deps to be added after everything is registered
