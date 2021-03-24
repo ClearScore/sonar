@@ -54,6 +54,7 @@
     "filehound": "1.17.4",
     "find-up": "5.0.0",
     "inquirer": "7.3.3",
+    "intl-list-format": "^1.0.3",
     "jsonfile": "6.1.0",
     "p-map": "4.0.0",
     "package-json": "6.5.0",
