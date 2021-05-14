@@ -21,6 +21,7 @@ class Workspace {
     async init({ onRegister = () => {} }) {
         const promises = this.paths.map(async (path) => {
             const contents = await jsonfile.readFile(path);
+            if (!contents.name) return; // only valid packages may pass
             onRegister();
             this.registerPackage({ contents, path });
         });
