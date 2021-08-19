@@ -12,6 +12,8 @@ const depsCheckDefaults = {
         // the target parsers
         '**/*.js': depcheck.parser.jsx,
         '**/*.jsx': depcheck.parser.jsx,
+        '**/*.ts': depcheck.parser.typescript,
+        '**/*.tsx': depcheck.parser.typescript,
     },
     detectors: [
         // the target detectors
