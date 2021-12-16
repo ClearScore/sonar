@@ -305,6 +305,20 @@ For more information go here: https://docs.npmjs.com/about-semantic-versioning
 
 ![image](./assets/update.png)
 
+
+# Troubleshooting
+## Jfrog Auth Token error 
+
+Sonar requires the correct auth token setup to sync with JFrog Artifactory. 
+
+In your `.npmrc` file, make sure the JFrog auth token line starts with `//` instead of `https:`.
+
+.i.e. `//clearscoredev.jfrog.io/clearscoredev/api/npm/npm/:_auth = bHVpZ2kucG.....`
+
+You can find the `.npmrc` file in `~/Users/<your.name>/.npmrc`, is an hidden file so do `shift+cmd+.` to visualise it.
+
+![image](./assets/jfrog-auth-token-error.png)
+
 # todo
 
 - ALL: add `--interactive` (`-i`) option. keep changes in memory and ask `fix` each change?
