@@ -165,7 +165,7 @@ const validateUnused = async ({ workspace, argv }) => {
 
         // since 'dev' files include most files, now check for mis-formed files
         if (Object.keys(unused.invalidFiles).length) {
-            error(`Could not read file in ${pkg.getName()}`);
+            error(`Could not read file in ${pkg.name}`);
             error(JSON.stringify(unused.invalidFiles, null, 2));
         }
     });
