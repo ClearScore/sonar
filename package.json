@@ -1,6 +1,6 @@
 {
   "name": "@clearscore/sonar",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "Script for bumping to latest dependencies",
   "main": "src/index.js",
   "src": "src/index.js",
