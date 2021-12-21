@@ -10,6 +10,8 @@ const depsCheckDefaults = {
     skipMissing: false, // skip calculation of missing dependencies
     parsers: {
         // the target parsers
+        '**/*.cjs': depcheck.parser.jsx,
+        '**/*.mjs': depcheck.parser.jsx,
         '**/*.js': depcheck.parser.jsx,
         '**/*.jsx': depcheck.parser.jsx,
         '**/*.ts': depcheck.parser.typescript,
