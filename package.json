@@ -48,10 +48,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "chalk": "4.1.0",
+    "chalk": "4.1.2",
     "deepmerge": "4.2.2",
-    "depcheck": "1.4.0",
-    "filehound": "1.17.4",
+    "depcheck": "1.4.2",
+    "filehound": "1.17.5",
     "find-up": "5.0.0",
     "inquirer": "7.3.3",
     "intl-list-format": "^1.0.3",
