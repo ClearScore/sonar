@@ -2,7 +2,11 @@ const packageJson = require('package-json');
 
 const getVersion = async (packageName, { canary } = {}) => {
     const data = await packageJson(packageName.toLowerCase(), { allVersions: true });
-    return canary ? Object.keys(data.versions).find((version) => version.includes(canary)) : data['dist-tags'].latest;
+    return canary
+        ? Object.keys(data.versions)
+              .sort((a, z) => (a - z < 0 ? -1 : 0))
+              .find((version) => version.includes(canary))
+        : data['dist-tags'].latest;
 };
 
 async function getLatestFromRepo(pck, options) {
