@@ -7,9 +7,12 @@ import { hideBin } from 'yargs/helpers';
 const configPathJson = findUpSync(['.sonarrc', '.sonar.json']);
 const configPathJs = configPathJson || findUpSync(['.sonarrc.js','.sonarrc.mjs', 'sonar.config.js', 'sonar.config.mjs']);
 // eslint-disable-next-line import/no-dynamic-require, no-nested-ternary
-const config = await (configPathJson ? JSON.parse(fs.readFileSync(configPathJson)) : configPathJs ? import(configPathJs) : {});
+const config = await (configPathJson ?
+    JSON.parse(fs.readFileSync(configPathJson)) : configPathJs ?
+        import(configPathJs).then(({ default: config }) => config) : {});
 
-yargs(hideBin(process.argv))
+// need to return { argv } otherwise the whole thing breaks!
+const { argv } = yargs(hideBin(process.argv))
     .option('fix', {
         type: 'boolean',
         description: 'Update the package.json files if updates are found',

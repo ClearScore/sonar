@@ -21,6 +21,7 @@ export default {
     ],
     depCheckConfig: {
         ignoreMatches: [
+            'eslint-plugin-jest',
             'jest-junit',
             '@commitlint/config-conventional',
             'lint-staged'
