@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-const { PATCH, MINOR, MAJOR } = require('./consts');
-const { log, error, title } = require('./log');
-const listify = require('./listify');
+import { PATCH, MINOR, MAJOR } from './consts.mjs';
+import { log, error, title } from './log.mjs';
+import listify from './listify.mjs';
 
-function errorFactory({ major, minor, patch }) {
+export function errorFactory({ major, minor, patch }) {
     const errors = {};
 
     const logOutstanding = (type) => {
@@ -86,5 +86,3 @@ function errorFactory({ major, minor, patch }) {
         saveError,
     };
 }
-
-module.exports = { errorFactory };

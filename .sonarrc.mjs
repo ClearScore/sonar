@@ -1,7 +1,7 @@
-module.exports = {
+export default {
     // used in 'sonar update'
     ignoreScopes: ['@not-published'],
-    internalScopes: ['@clearscore', '@clearscore-tools', '@clearscore-verticals'],
+    internalScopes: ['@clearscore'],
     groups: {
         lint: '^eslint(.*)?',
     },
@@ -20,7 +20,11 @@ module.exports = {
         'storybook',
     ],
     depCheckConfig: {
-        ignoreMatches: ['jest-junit', '@commitlint/config-conventional'],
+        ignoreMatches: [
+            'jest-junit',
+            '@commitlint/config-conventional',
+            'lint-staged'
+        ],
         ignorePatterns: ['dist', 'build'],
     },
 };

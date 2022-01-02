@@ -1,18 +1,18 @@
 // Yargs module:
 // https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
-const chalk = require('chalk');
-const inquirer = require('inquirer');
-const ProgressBar = require('progress');
+import chalk from 'chalk';
+import inquirer from 'inquirer';
+import ProgressBar from 'progress';
 
-const getWorkspace = require('../workspace');
-const { log, success, error, warning, branding } = require('./lib/log');
-const { errorFactory } = require('./lib/has-errors');
+import getWorkspace from '../workspace/index.mjs';
+import { log, success, error, warning, branding } from './lib/log.mjs';
+import { errorFactory } from './lib/has-errors.mjs';
 
-exports.command = 'sync';
+export const command = 'sync';
 
-exports.describe = 'Sync your local workspace';
+export const describe = 'Sync your local workspace';
 
-exports.builder = function handler(yargs) {
+export function builder(yargs) {
     yargs
         .option('remote', {
             // it's rare this is needed, but useful for publish failures
@@ -32,9 +32,9 @@ exports.builder = function handler(yargs) {
             '$0 sync --remote',
             'Sync all your workspace package version numbers with what has already been released',
         );
-};
+}
 
-exports.handler = async function handler(argv) {
+export async function handler(argv) {
     const { saveError, logErrors } = errorFactory({ major: true, minor: true, patch: true });
     const workspacePromise = getWorkspace({ folder: argv.folder });
     let answersPromise = Promise.resolve();
@@ -123,4 +123,4 @@ exports.handler = async function handler(argv) {
     if (argv.fail && hasErrors) {
         process.exit(1);
     }
-};
+}

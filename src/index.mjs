@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-const yargs = require('yargs');
-const fs = require('fs');
-// require('abab');
-const findUp = require('find-up');
+import fs from 'node:fs';
+import yargs from 'yargs';
+import { findUpSync } from 'find-up';
+import { hideBin } from 'yargs/helpers';
 
-const configPathJson = findUp.sync(['.sonarrc', '.sonar.json']);
-const configPathJs = configPathJson || findUp.sync(['.sonarrc.js', 'sonar.config.js']);
+const configPathJson = findUpSync(['.sonarrc', '.sonar.json']);
+const configPathJs = configPathJson || findUpSync(['.sonarrc.js','.sonarrc.mjs', 'sonar.config.js', 'sonar.config.mjs']);
 // eslint-disable-next-line import/no-dynamic-require, no-nested-ternary
-const config = configPathJson ? JSON.parse(fs.readFileSync(configPathJson)) : configPathJs ? require(configPathJs) : {};
+const config = await (configPathJson ? JSON.parse(fs.readFileSync(configPathJson)) : configPathJs ? import(configPathJs) : {});
 
-const { argv, ...rest } = yargs
+yargs(hideBin(process.argv))
     .option('fix', {
         type: 'boolean',
         description: 'Update the package.json files if updates are found',
@@ -33,14 +33,11 @@ const { argv, ...rest } = yargs
     })
     .config(config)
     .pkgConf('sonar')
-    .command(require('./commands/sync.js'))
-    .command(require('./commands/update.js'))
-    .command(require('./commands/validate.js'))
+    .command(await import('./commands/sync.mjs'))
+    .command(await import('./commands/update.mjs'))
+    .command(await import('./commands/validate.mjs'))
     .example('$0 sync --help')
     .example('$0 update --help')
     .example('$0 validate --help')
+    .demandCommand()
     .help();
-
-if (!['sync', 'update', 'validate'].includes(argv._[0])) {
-    rest.showHelp();
-}

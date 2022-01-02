@@ -1,5 +1,7 @@
-const { MINOR, PATCH } = require('./consts');
-const { getNewSemver, getWildCards } = require('./get-new-semver');
+import { describe, it, expect } from '@jest/globals';
+
+import { MINOR, PATCH } from './consts.mjs';
+import { getNewSemver, getWildCards } from './get-new-semver.mjs';
 
 describe('wild-cards', () => {
     describe('getWildCards', () => {

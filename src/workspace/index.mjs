@@ -1,10 +1,10 @@
-const FileHound = require('filehound');
-const ProgressBar = require('progress');
+import FileHound from 'filehound';
+import ProgressBar from 'progress';
 
-const { log, branding } = require('./lib/log');
-const Workspace = require('./classes/workspace');
+import { log, branding } from './lib/log.mjs';
+import Workspace from './classes/workspace.mjs';
 
-module.exports = ({ folder }) => {
+export default ({ folder }) => {
     let wsBar;
     log(`Creating Workspaces`);
 

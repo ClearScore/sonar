@@ -1,9 +1,9 @@
-const pMap = require('p-map');
-const ProgressBar = require('progress');
-const inquirer = require('inquirer');
+import pMap from 'p-map';
+import ProgressBar from 'progress';
+import inquirer from 'inquirer';
 
-const { log, error, success, warning } = require('../lib/log');
-const { errorFactory } = require('../lib/has-errors');
+import { log, error, success, warning } from '../lib/log.mjs';
+import { errorFactory } from '../lib/has-errors.mjs';
 
 const validateVersions = async ({ workspace, argv }) => {
     const { saveError, logErrors } = errorFactory({ major: true, minor: true, patch: true });
@@ -80,4 +80,4 @@ const validateVersions = async ({ workspace, argv }) => {
     return { hasErrors };
 };
 
-module.exports = validateVersions;
+export default validateVersions;

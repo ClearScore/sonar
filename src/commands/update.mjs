@@ -1,20 +1,20 @@
 // Yargs module:
 // https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
 
-const chalk = require('chalk');
-const ProgressBar = require('progress');
+import chalk from 'chalk';
+import ProgressBar from 'progress';
 
-const getWorkspace = require('../workspace');
-const { log, error, success, warning, branding } = require('./lib/log');
-const { errorFactory } = require('./lib/has-errors');
-const listify = require('./lib/listify');
-const { MAJOR, MINOR, PATCH, PREMAJOR, PREPATCH, PREMINOR, PRERELEASE } = require('./lib/consts');
+import getWorkspace from '../workspace/index.mjs';
+import { log, error, success, warning, branding } from './lib/log.mjs';
+import { errorFactory } from './lib/has-errors.mjs';
+import listify from './lib/listify.mjs';
+import { MAJOR, MINOR, PATCH, PREMAJOR, PREPATCH, PREMINOR, PRERELEASE } from './lib/consts.mjs';
 
-exports.command = 'update';
+export const command = 'update';
 
-exports.describe = 'Update your workspace dependencies';
+export const describe = 'Update your workspace dependencies';
 
-exports.builder = function handler(yargs) {
+export function builder(yargs) {
     yargs
         .option('internal', {
             type: 'boolean',
@@ -115,7 +115,7 @@ exports.builder = function handler(yargs) {
             }
             return newArgs;
         });
-};
+}
 
 const matchesPattern = (dependency, { options, patternRegEx, groupRegEx }) => {
     const { name, scope } = dependency;
@@ -130,7 +130,7 @@ const matchesPattern = (dependency, { options, patternRegEx, groupRegEx }) => {
     return check;
 };
 
-exports.handler = async function handler(argv) {
+export async function handler(argv) {
     const workspace = await getWorkspace({ folder: argv.folder });
     const { saveError, logErrors } = errorFactory(argv);
     const semVer = [argv.patch && 'patch', argv.minor && 'minor', argv.major && 'major'].filter(Boolean).join(', ');
@@ -248,4 +248,4 @@ exports.handler = async function handler(argv) {
     if (argv.fail && hasErrors) {
         process.exit(1);
     }
-};
+}

@@ -1,12 +1,12 @@
-module.exports = {
-    testRegex: '\\.test\\.js$',
+export default {
+    testRegex: '\\.test\\.js',
     testURL: 'http://localhost',
     setupFiles: [],
     coverageDirectory: './.reports/coverage',
     collectCoverage: false,
     reporters: ['default', 'jest-junit'],
     roots: ['<rootDir>'],
-    collectCoverageFrom: ['src/**/*.js'],
+    collectCoverageFrom: ['src/**/*.js', 'src/**/*.mjs'],
     testPathIgnorePatterns: [],
     moduleNameMapper: {},
     resetMocks: true,

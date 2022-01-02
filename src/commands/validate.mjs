@@ -1,19 +1,19 @@
 // Yargs module:
 // https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module
 
-const chalk = require('chalk');
+import chalk from 'chalk';
 
-const getWorkspace = require('../workspace');
-const { log } = require('./lib/log');
-const listify = require('./lib/listify');
-const validateVersions = require('./validate/versions');
-const validateUnused = require('./validate/unused');
+import getWorkspace from '../workspace/index.mjs';
+import { log } from './lib/log.mjs';
+import listify from './lib/listify.mjs';
+import validateVersions from './validate/versions.mjs';
+import validateUnused from './validate/unused.mjs';
 
-exports.command = 'validate';
+export const command = 'validate';
 
-exports.describe = 'validate your workspace dependency versions';
+export const describe = 'validate your workspace dependency versions';
 
-exports.builder = function handler(yargs) {
+export function builder(yargs) {
     yargs
         .option('versions', {
             type: 'boolean',
@@ -38,9 +38,9 @@ exports.builder = function handler(yargs) {
             }
             return newArgs;
         });
-};
+}
 
-exports.handler = async function handler(argv) {
+export async function handler(argv) {
     const workspace = await getWorkspace({ folder: argv.folder });
 
     log(`------------`);
@@ -72,4 +72,4 @@ exports.handler = async function handler(argv) {
     if (argv.fail && (depCheckErrors || versionErrors)) {
         process.exit(1);
     }
-};
+}

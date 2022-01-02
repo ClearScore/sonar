@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
-const semver = require('semver');
+import semver from 'semver';
 
-const { DEPENDENCIES, DEV_DEPENDENCIES, PEER_DEPENDENCIES } = require('../lib/consts');
-const { getLatestFactory } = require('../lib/get-latest');
-const { getNewSemver } = require('../lib/get-new-semver');
+import { DEPENDENCIES, DEV_DEPENDENCIES, PEER_DEPENDENCIES } from '../lib/consts.mjs';
+import { getLatestFactory } from '../lib/get-latest.mjs';
+import { getNewSemver } from '../lib/get-new-semver.mjs';
 
 const getLatest = getLatestFactory();
 
@@ -174,4 +174,4 @@ class Dependency {
     }
 }
 
-module.exports = Dependency;
+export default Dependency;

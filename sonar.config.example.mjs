@@ -1,7 +1,7 @@
-module.exports = {
+export default {
     // used in 'sonar update'
     ignoreScopes: ['@not-published'],
-    internalScopes: ['@clearscore'],
+    internalScopes: ['@clearscore', '@clearscore-tools', '@clearscore-verticals'],
     groups: {
         lint: '^eslint(.*)?',
     },

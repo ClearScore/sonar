@@ -10,7 +10,7 @@ module.exports = {
     parserOptions: {
         sourceType: 'module',
         ecmaFeatures: {
-            ecmaVersion: 2018,
+            ecmaVersion: 2020,
             classes: true,
         },
     },
@@ -22,6 +22,7 @@ module.exports = {
                 trailingComma: 'all',
                 arrowParens: 'always',
                 printWidth: 120,
+                tabWidth: 4,
             },
         ],
         indent: 0,
@@ -110,7 +111,7 @@ module.exports = {
     overrides: [
         // Jest
         {
-            files: ['**/*.test.js'],
+            files: ['**/*.test.js', '**/*.test.mjs'],
             env: {
                 jest: true,
             },
@@ -127,8 +128,8 @@ module.exports = {
                 'jest/consistent-test-it': 'error',
                 'jest/no-test-prefixes': 'error',
                 'jest/prefer-to-have-length': 'error',
-                'jest/prefer-to-be-null': 'error',
-                'jest/prefer-to-be-undefined': 'error',
+                // 'jest/prefer-to-be-null': 'error',
+                // 'jest/prefer-to-be-undefined': 'error',
                 /*
               Below are recommended
             */
@@ -142,7 +143,7 @@ module.exports = {
                 'jest/valid-expect': 'error',
                 'jest/valid-expect-in-promise': 'error',
                 'jest/no-large-snapshots': 'error',
-                'jest/valid-describe': 'error',
+                // 'jest/valid-describe': 'error',
                 /*
              Everything below here has been 'ignored' temporarily.
              Please feel to delete any of the following lines and fix any errors.

@@ -1,8 +1,8 @@
-const jsonfile = require('jsonfile');
+import jsonfile from 'jsonfile';
 
-const { DEV_DEPENDENCIES, PEER_DEPENDENCIES, DEPENDENCIES } = require('../lib/consts');
-const Package = require('./package');
-const Dependency = require('./dependency');
+import { DEV_DEPENDENCIES, PEER_DEPENDENCIES, DEPENDENCIES } from '../lib/consts.mjs';
+import Package from './package.mjs';
+import Dependency from './dependency.mjs';
 
 class Workspace {
     constructor(paths) {
@@ -131,4 +131,4 @@ class Workspace {
     }
 }
 
-module.exports = Workspace;
+export default Workspace;

@@ -1,8 +1,8 @@
-const semver = require('semver');
+import semver from 'semver';
 
-const { MINOR, PATCH } = require('./consts');
+import { MINOR, PATCH } from './consts.mjs';
 
-const getWildCards = (version) => {
+export const getWildCards = (version) => {
     const [, minorDep, patchDep = ''] = version.split('.');
     return {
         isWildPatch: patchDep.includes('x') || version.includes('~'),
@@ -10,7 +10,7 @@ const getWildCards = (version) => {
     };
 };
 
-const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
+export const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
     if (version.includes('~')) {
         // allow patches
         return semVerChange === PATCH ? version : `~${latestVersion}`;
@@ -28,7 +28,7 @@ const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
     return latestVersion;
 };
 
-const getNewSemver = ({ version, latestVersion }) => {
+export const getNewSemver = ({ version, latestVersion }) => {
     if (!version) return null;
     const depSatisfied = semver.satisfies(latestVersion, version);
     const coercedVersion = semver.coerce(version);
@@ -38,5 +38,3 @@ const getNewSemver = ({ version, latestVersion }) => {
     // only return update is
     return !depSatisfied ? { newVersion, semVerChange } : null;
 };
-
-module.exports = { replaceWildCards, getWildCards, getNewSemver };

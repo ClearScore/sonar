@@ -1,6 +1,6 @@
-const semver = require('semver');
+import semver from 'semver';
 
-const { getLatestFactory } = require('../lib/get-latest');
+import { getLatestFactory } from '../lib/get-latest.mjs';
 
 const getLatest = getLatestFactory();
 
@@ -141,4 +141,4 @@ class Package {
     }
 }
 
-module.exports = Package;
+export default Package;

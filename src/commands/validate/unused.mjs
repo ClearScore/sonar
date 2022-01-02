@@ -1,9 +1,9 @@
-const path = require('path');
-const depcheck = require('depcheck');
-const deepMerge = require('deepmerge');
-const ProgressBar = require('progress');
+import path from 'node:path';
+import depcheck from 'depcheck';
+import deepMerge from 'deepmerge';
+import ProgressBar from 'progress';
 
-const { error, warning, success, branding, log, title } = require('../lib/log');
+import { error, warning, success, branding, log, title } from '../lib/log.mjs';
 
 const depsCheckDefaults = {
     ignoreBinPackage: true, // ignore the packages with bin entry i.e. husky and jest which are used in npm scripts
@@ -50,9 +50,9 @@ const checkWorkspaceDeps = async ({
     packages.forEach((pkg) => {
         if (ignorePackages.includes(pkg.name)) return;
         const file = pkg.path === 'package.json' ? '.' : pkg.path.replace('/package.json', '');
-        const promise = new Promise((resolve) =>
-            depcheck(path.resolve(file), config, (unused) => resolve({ unused, pkg, isDev: devPatterns.length })),
-        );
+        const promise = new Promise((resolve) => {
+            depcheck(path.resolve(file), config, (unused) => resolve({ unused, pkg, isDev: devPatterns.length }));
+        });
         devBar.tick();
         promises.push(promise);
     });
@@ -259,4 +259,4 @@ const validateUnused = async ({ workspace, argv }) => {
     return { hasErrors: packagesWithChanges };
 };
 
-module.exports = validateUnused;
+export default validateUnused;
