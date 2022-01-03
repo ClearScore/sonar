@@ -117,6 +117,8 @@ const validateUnused = async ({ workspace, argv }) => {
         missing.forEach((depName) => {
             // no need to add it to the root if it's a workspace package
             if (pkg.name === rootPackage.name && workspace.getPackage({ name: depName })) return;
+            // ignore node packages
+            if (depName.startsWith('node:')) return;
             // console.log(`0. adding prod dep ${depName} from ${pkg.name}`);
             resultCache[pkg.name].missing.prod[depName] = { name: depName, type: 'dependencies', pkg };
         });
