@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import chalk from 'chalk';
 
-export const branding = chalk.bgBlue.whiteBright(' Workspace ');
-const errorBranding = chalk.bgRed.whiteBright(' Workspace ');
-const warningBranding = chalk.bgCyan.whiteBright(' Workspace ');
-const successBranding = chalk.bgGreen.whiteBright(' Workspace ');
+export const branding = chalk.bgBlue.whiteBright(' Sonar ');
+const errorBranding = chalk.bgRed.whiteBright(' Sonar ');
+const warningBranding = chalk.bgCyan.whiteBright(' Sonar ');
+const successBranding = chalk.bgGreen.whiteBright(' Sonar ');
 
 export function title(message) {
     return console.log(`\n${branding} ${chalk.bold(message)}`);
