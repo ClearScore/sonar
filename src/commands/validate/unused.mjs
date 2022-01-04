@@ -45,7 +45,7 @@ const checkWorkspaceDeps = async ({
     const phase = devPatterns.length ? 1 : 2;
     const barTitle = `${branding} Phase ${phase}: ${phase === 1 ? 'production' : 'development'} [:bar] :percent`;
     const devBar = new ProgressBar(barTitle, { total: packageCount });
-    const config = deepMerge({ ...depsCheckDefaults, ignorePatterns: devPatterns }, depCheckConfig);
+    const config = deepMerge({ ...depsCheckDefaults, ignorePatterns: [...devPatterns, '.yarn', 'node_modules', 'dist'] }, depCheckConfig);
     const promises = [];
     packages.forEach((pkg) => {
         if (ignorePackages.includes(pkg.name)) return;

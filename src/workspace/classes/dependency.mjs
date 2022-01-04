@@ -61,7 +61,7 @@ class Dependency {
         this.registerVersion({ version, type });
 
         // todo: add non-peer min version adn non-peer mismatch check. who cares about peers.
-        const newIsGtMin = semver.gt(semver.minVersion(version), semver.minVersion(this.minVersion));
+        const newIsGtMin = !version.startsWith('workspace:') && semver.gt(semver.minVersion(version), semver.minVersion(this.minVersion));
         this.minVersion = newIsGtMin ? this.minVersion : version;
 
         this.workspacePackage = this.workspacePackage || workspacePackage;

@@ -10,7 +10,7 @@ export default ({ folder }) => {
 
     return FileHound.create()
         .paths(folder)
-        .discard('node_modules')
+        .discard(['node_modules', '.yarn', 'dist'])
         .ignoreHiddenDirectories()
         .ignoreHiddenFiles()
         .match('package.json')
