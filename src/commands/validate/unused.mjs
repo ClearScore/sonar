@@ -170,8 +170,10 @@ const validateUnused = async ({ workspace, argv }) => {
         // since 'dev' files include most files, now check for mis-formed files
         if (Object.keys(unused.invalidFiles).length) {
             error(`Could not read file in ${pkg.name}`);
-            error(JSON.stringify(unused.invalidFiles, null, 2));
-        }
+            Object.entries(unused.invalidFiles).map(([file, e]) => {
+                error(file)
+                console.error(e)
+            });        }
     });
 
     // step 5. now we have all the data, we can go through unused deps in prod, see if they are used in dev
