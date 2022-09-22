@@ -1,6 +1,8 @@
 export default {
     testRegex: '\\.test\\.js',
-    testURL: 'http://localhost',
+    testEnvironmentOptions: {
+        url: 'http://localhost',
+    },
     setupFiles: [],
     coverageDirectory: './.reports/coverage',
     collectCoverage: false,
