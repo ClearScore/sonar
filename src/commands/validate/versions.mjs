@@ -10,25 +10,44 @@ const validateVersions = async ({ workspace, argv }) => {
     const localBar = new ProgressBar('Checking dependency versions [:bar] :percent', {
         total: workspace.getPackageCount(),
     });
+
     const mismatchPeer = workspace
         .getDependencies()
         .filter((dependency) => dependency.getVersions({ peer: true, dep: false, dev: false }).length > 1);
+
     const mismatchUsage = workspace
         .getDependencies()
-        .filter((dependency) => dependency.getVersions({ peer: false, dep: true, dev: true }).length > 1);
+        .filter((dependency) => {
+            const versions = dependency.getVersions({ peer: false, dep: true, dev: true });
+            const multipleDepVersions = versions.length > 1
+            const workspaceVersion = dependency.workspacePackage?.version;
+            const mismatchWorkspaceVersion = workspaceVersion && !versions.find(({version}) => version === workspaceVersion)
+            return multipleDepVersions || (mismatchWorkspaceVersion)
+        });
 
     const mapper = (filter, note) => async (dependency) => {
         const versions = dependency.getVersions(filter);
+        const workspaceVersion = dependency.workspacePackage?.version
         if (argv.fix) {
+            const choices = []
+            if (workspaceVersion) {
+                choices.push({
+                    name: `${workspaceVersion} (Workspace Version)`,
+                    value: workspaceVersion,
+                })
+            }
+            versions.forEach(({ version, count }) => {
+                choices.push({
+                    name: `${version} (${count} usages)`,
+                    value: version,
+                })
+            });
             const answers = await inquirer.prompt([
                 {
                     type: 'list',
                     name: 'version',
                     message: `Which version should "${dependency.name}" be on ${note}?`,
-                    choices: versions.map(({ version, count }) => ({
-                        name: `${version} (${count} usages)`,
-                        value: version,
-                    })),
+                    choices,
                 },
             ]);
 
@@ -42,6 +61,9 @@ const validateVersions = async ({ workspace, argv }) => {
             localBar.tick();
         } else {
             warning(`${dependency.name} ${note}`);
+            if (workspaceVersion) {
+                log(`        - ${workspaceVersion}: is the workspace version.`);
+            }
             versions.forEach(({ version, count }) => {
                 log(`        - ${version}: has ${count} usages.`);
             });
