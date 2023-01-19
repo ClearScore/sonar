@@ -20,14 +20,14 @@ const validateVersions = async ({ workspace, argv }) => {
         .filter((dependency) => {
             const versions = dependency.getVersions({ peer: false, dep: true, dev: true });
             const multipleDepVersions = versions.length > 1
-            const workspaceVersion = dependency.workspacePackage?.version;
+            const workspaceVersion = dependency.minVersion.includes("workspace") ? dependency.minVersion : dependency.workspacePackage?.version;    
             const mismatchWorkspaceVersion = workspaceVersion && !versions.find(({version}) => version === workspaceVersion)
             return multipleDepVersions || (mismatchWorkspaceVersion)
         });
 
     const mapper = (filter, note) => async (dependency) => {
         const versions = dependency.getVersions(filter);
-        const workspaceVersion = dependency.workspacePackage?.version
+        const workspaceVersion = dependency.minVersion.includes("workspace") ? dependency.minVersion : dependency.workspacePackage?.version;    
         if (argv.fix) {
             const choices = []
             if (workspaceVersion) {
