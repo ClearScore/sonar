@@ -30,7 +30,11 @@ export function errorFactory({ major, minor, patch }) {
             .sort()
             .filter((key) => errors[type][key].type === 'dependency');
         if (!deps.length) return;
-        title(`--- ${type.toUpperCase()} Dependency Updates (${deps.length}) ---`);
+        title(
+          `--- ${
+            type === "undefined" ? "Workspace" : type.toUpperCase()
+          } Dependency Updates (${deps.length}) ---`
+        );
 
         deps.forEach((dependency) => {
             const { version, newVersion } = errors[type][dependency];
