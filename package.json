@@ -63,7 +63,7 @@
     "inquirer": "8.2.4",
     "jsonfile": "6.1.0",
     "p-map": "5.5.0",
-    "package-json": "7.0.0",
+    "package-json": "8.1.0",
     "progress": "2.0.3",
     "semver": "7.3.7",
     "typescript": "4.8.3",
