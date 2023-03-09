@@ -30,9 +30,8 @@ export const replaceWildCards = ({ version, latestVersion, semVerChange }) => {
 
 export const getNewSemver = ({ version, latestVersion }) => {
     if (!version) return null;
-    if (latestVersion.includes("workspace")) {
-        return { latestVersion, latestVersion };
-    }
+    if (version.includes("workspace")) return null;
+
     const depSatisfied = semver.satisfies(latestVersion, version);
     const coercedVersion = semver.coerce(version);
     const coercedLatestVersion = semver.coerce(latestVersion);

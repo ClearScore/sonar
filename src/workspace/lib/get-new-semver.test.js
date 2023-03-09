@@ -44,6 +44,11 @@ describe('wild-cards', () => {
     });
     describe('update', () => {
         describe('wild patches', () => {
+            it('return null for local deps with workspace as a version', () => {
+                const version = 'workspace:*';
+                const latestVersion = '1.1.2';
+                expect(getNewSemver({ version, latestVersion })).toBeNull();
+            });
             it('return latestVersion when there is nothing to replace', () => {
                 const version = '1.1.1';
                 const latestVersion = '1.1.2';
